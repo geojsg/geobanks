@@ -1,0 +1,135 @@
+<center>
+# Comparing Georgian Banks
+### *An example of web scraping, data wrangling and data visualization with R*
+
+by JS Gourdet  
+
+<img src="http://www.iset.ge/blog/wp-content/uploads/2013/05/photo-v2-640x240.png" heigth=120 width=320 alt="Georgian Banks">
+</center>
+
+## 1. Objectives
+
+Quarterly, financial reports of Georgian Banks are uploaded on the website of the National Bank of Georgia.  
+A lot of semi-structured financial data are therefore publicly available.
+Let's use them to compare Georgian Banks from different points of view.    
+  
+But how to exploit, transform and represent these data from the National Bank of Georgia website to a user-friendly charts ?  
+This is the challenge that this document is addressing using the tool R. 
+
+**Disclaimer**: The objective of this document is not to provide an accurate financial analysis of the Georgian Banks, 
+but just the technical steps to show how to leverage insights from available raw data.
+
+## 2. Input
+
+Data source for the analysis is the page "*Financial Indices of Commercial Banks*" of the National Bank of Georgia:
+https://www.nbg.gov.ge/index.php?m=404&lng=eng
+
+## 3. Outputs: Motion charts (4D)
+
+### 3.1. Evolution of Banks' Net Income, Total Assets and Personnel over time
+
+The purpose of this graph is to show the evolution over time of the Banks' net income (from profit & loss statement) 
+according to their total assets (balance sheet) and sizing them (bubbles) by the size of their personnel (using personnel expenses from P&L).
+
+However, as figures of profit & loss statement are reset every year, it does not make sense to each quarterly reports over years, otherwise the chart would 
+look like a sawtooth-shaped chart. So only 1 quarter (the 3rd as the 4th is not available) is picked for each year. Then other quarters are extrapolated (of course not very accurate, but enough for this technical excerice).
+
+**User guide:**  
+1. As the variable ***Size*** on the chart cannot be set automatically (bug), set it manually to the value "***StaffExp***"  
+2. Press the button play (arrow) to visualize the motion chart.  
+3. You can change axis if you want but also visualize other chart using other tabs (top-right corner)  
+
+``` {r building_chart1, echo=FALSE, results=FALSE }
+## Loading library
+suppressPackageStartupMessages(library(googleVis))
+
+## Loading file and recognizing dates
+Banks<-read.csv("GeoBanks.csv", colClasses=c("factor","character","numeric","numeric","numeric"), header=T)
+Banks$RepDate<-as.Date(strptime(Banks$RepDate,"%Y-%m-%d"))
+
+## Filtering only Quarter 3 (September report) and adding date in quarter format in a new column
+Banks2<-Banks[format(Banks$RepDate,"%m")=="09",]
+Banks2$Quarter<-paste(as.integer(format(Banks2$RepDate,"%Y")),as.integer(format(Banks2$RepDate,"%m"))/3,sep="Q")
+
+## Ordering the columns (for chart)
+Banks3<-data.frame(Bank=Banks2$Bank,Quarter=Banks2$Quarter,TotAssets=Banks2$TotAssets,
+NetIncome=Banks2$NetIncome, StaffExp=Banks2$StaffExp)
+
+## Building the motion chart using 4 features
+Banks3$Quarter<-as.character(Banks3$Quarter)
+M<-gvisMotionChart(Banks3,idvar="Bank",timevar="Quarter", xvar="TotAssets", yvar="NetIncome",
+sizevar="StaffExp", options=list(width=600, height=400,state='{"colorOption":"_UNIQUE_COLOR"};'))
+```
+
+``` {r displaying_chart1, echo=FALSE, results='asis' }
+## Displaying the chart
+print(M,"chart")
+```
+
+## 4. Intermediary Steps
+
+### Step 1: Downloading Banks' Quarterly Reports
+
+**Input**: Webpage "Financial Indices of Commercial Banks" of the National Bank.
+
+**Sub-steps:**
+1. Extracting the list of Georgian Banks's names (to use as referential for further steps).
+2. Extracting all the URLs of the quarterly reports
+3. Downloading all the quarterly reports
+
+**Outputs:**
+* CSV file with list of banks
+* Excel files of all Banks' quaterly reports 
+
+See source code: [01-harvestGeoBanks.R](http://github.com/geojsg)
+
+### Step 2: Transforming raw data into structured data
+
+**Input:** 
+- CSV file with list of banks (generated from step1)
+- Excel files of all Banks' quaterly reports (generated from step1)
+
+**Sub-steps:**  
+For each reports, extract following fields :
+1. Bank name (handling exceptions of renamed banks and using a fuzzy matching as names are sometimes partial or with typos)  
+2. Report Date (using parsing as not all the time in same format)
+3. NetIncome and Personnel expenses from P&L
+4. TotalAssets from balance sheet
+
+**Outputs:**
+- CSV file including selected features (e.g. Total Assets, ...) per bank and per quarter.
+
+See source code: [02-transformGeoBanks.R](http://github.com/geojsg)
+
+### Step 3: Generating the charts embedded in a HTML file
+
+**Input:**
+- CSV file including selected features (e.g. Total Assets, ...) per bank and per quarter. (generated from step2)
+
+**Sub-steps:**  
+1. Creating report (this HTML page) in Rmarkdown  
+2. Filtering only banks' figures from Quarter 3  
+3. Building the chart with Google Chart (googleVis)  
+4. Displaying the chart embedded in the page.  
+
+**Output:**
+- HTML file (this page) with embedded motion charts.
+
+See source code: [03-GeoBanks.Rmd](http://github.com/geojsg)
+
+## 5. Lessons Learned
+
+- Unfortunately, bank's financial data of quarter IV (most important) of each year is not available as data are uploaded in pdf. We suggest to the National Bank to provide data in Excel format as well.  
+- Google Motion Chart seems to have some bugs: when bubbles' color is set to "_UNIQUE", the the feature for te size of bubbles is no more considered.
+- Reports in Excel could mean data are semi-structured as formated by a template. However, data quality was not so good (see below issues) which required to add more codes to handle exceptions or make fuzzy matching and parsing.
+
+
+### Summary of Data Quality issues
+
+- 2013-Q3 report of Progress Bank not available  
+- 2007-Q2 report of Liberty Bank (People's Bank) not available as, instead of it, was uploaded report of Bank Republic  
+- In 2014-Q3 report of Pasha Bank, report date written is the one of the previous year (2013-Q3)
+- Report Date and Bank name are not all the time written on each sheet.
+- Dates are not in same date format (Excel date format) in several reports.  
+- Names of the Excel sheets are not exactly the same for some reports. For example, there can be found, sheets named "RC " instead of "RC".  
+
