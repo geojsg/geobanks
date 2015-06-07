@@ -50,11 +50,15 @@ DataFromReport<-function (f) {
 	## Identifying and extracting Net Loans and Deposits (term and on-demand)
 	rLoans<-grep("Net Loans",BS[,colBS])
 	NetLoans<-round(as.numeric(BS[rLoans,colBS+3]),2)
+  NetLoans[is.na(NetLoans)]<-0
 	rTimeDeposit<-grep("Time Deposits",BS[,colBS])
 	TimeDeposit<-round(as.numeric(BS[rTimeDeposit,colBS+3]),2)
 	rDemandDeposit<-grep("Demand Deposits",BS[,colBS])
 	DemandDeposit<-round(as.numeric(BS[rDemandDeposit,colBS+3]),2)
+	TimeDeposit[is.na(TimeDeposit)]<-0
+	DemandDeposit[is.na(DemandDeposit)]<-0
 	Deposit<-TimeDeposit+DemandDeposit
+	
 
 	## Identifying Bank name and Report date if available on balance sheet
 
@@ -121,19 +125,26 @@ DataFromReport<-function (f) {
 	## In case, no date could be found, raise an error and stop the process.
 	if (is.na(RepDate)) stop("Date not defined")
 
-	## Manage an exception (wrong date filled in report)
+	## Manage exceptions (wrong date filled in report)
 	if (grepl("pasha3q_eng.xlsx$",f)) RepDate<-as.Date("2014-09-30")
+	if (grepl("decree145iba062009e.xls$",f)) RepDate<-as.Date("2009-06-30")
+	if (grepl("decree145kor032009e.xls$",f)) RepDate<-as.Date("2009-03-31")
+	#if (grepl("decree_145lib102012e.xls$",f)) RepDate<-as.Date("2012-09-30")
+	if (grepl("decree145tao062009e.xls$",f)) RepDate<-as.Date("2009-06-30")
+	if (grepl("bpgqi.xlsx$",f)) RepDate<-as.Date("2014-03-31")
+	
 	
 	## Generate a 1-row dataframe including Banks' feature of a quarter report
-	data.frame(Bank=Bank, RepDate=RepDate, TotAssets=TotAssets, StaffExp=StaffExp, NetIncome=NetIncome, NetLoans=NetLoans, Deposit=Deposit)
+	data.frame(Bank=Bank, RepDate=RepDate, TotalAssets=TotAssets, StaffExpenses=StaffExp, NetIncome=NetIncome, NetLoans=NetLoans, Deposit=Deposit)
 
 }
 
 
 ## FUNCTION TO GATHER THE FEATURES FROM ALL REPORTS AND EXPORT TO CSV
 
-TableBank<-function(source, dest) {
+TableBank<-function(source) {
 	reports<-list.files(source)
+  register<-NULL
 	exceptions<-c("nbg3.2.2peoplesbank30.06.2007_2eng.xls","progress_3q_11_11.xlsx")
 
 	for (report in reports) {
@@ -146,8 +157,9 @@ TableBank<-function(source, dest) {
 			}
 		}
 	}
-	write.csv(register,paste(dest,"GeoBanks.csv",sep="/"),row.names=F)
-	print(paste("Variable 'register' created from ",length(reports)," reports and file created: ", dest,"/","GeoBanks.csv",sep=""))
+	print(paste("Variable 'register' created from ",length(reports)," reports"))
+	register
+	
 }
 
 
@@ -160,7 +172,7 @@ library(stringdist)
 library(parsedate)
 
 ## directories (without "/" at the end)
-dir_reports<-"banks"
+dir_reports<-"Banks"
 dir_banknames<-"."
 dir_output<-"."
 
@@ -170,4 +182,22 @@ bankn<-read.csv(paste(dir_banknames,"banknames.csv",sep="/"),colClasses="charact
 banknames<-bankn$Names
 
 ## Launch the generation of the table and its export to a CSV file
-TableBank(dir_reports,dir_output)
+register<-TableBank(dir_reports)
+
+## Converting date to quarter of year
+register$Quarter<-paste(as.integer(format(register$RepDate,"%Y")),as.integer(format(register$RepDate,"%m"))%/%3,sep="Q")
+
+## Calculate total market (sum of all banks) of Net Loans and Deposit per quarter
+agg<-aggregate(cbind(NetLoans, Deposit) ~ Quarter, data=register,sum)
+names(agg)[2:3]<-c("TotalLoans","TotalDeposit")
+
+## Add total loans and deposits market for each banks quarter report (doing a left-join)
+register2<-merge(register,agg,by.x="Quarter", by.y="Quarter", all.x=TRUE)
+
+## Calculating the market shares (Loan & Deposit) of each Bank per quarter
+register2$DepositShare<-round(100*register2$Deposit/register2$TotalDeposit,2)
+register2$LoanShare<-round(100*register2$NetLoans/register2$TotalLoans,2)
+
+## Exporting the table Keeping only features needed for future charts
+write.csv(register2[,-c(3,7,8,9,10)],paste(dir_output,"GeoBanks.csv",sep="/"),row.names=F)
+print (paste("File created: ",dir_output,"/","GeoBanks.csv",sep=""))
