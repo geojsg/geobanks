@@ -1,0 +1,4970 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+
+<title>Comparing Georgian Banks</title>
+
+<script type="text/javascript">
+window.onload = function() {
+  var imgs = document.getElementsByTagName('img'), i, img;
+  for (i = 0; i < imgs.length; i++) {
+    img = imgs[i];
+    // center an image if it is the only element of its parent
+    if (img.parentElement.childElementCount === 1)
+      img.parentElement.style.textAlign = 'center';
+  }
+};
+</script>
+
+
+
+
+
+<style type="text/css">
+body, td {
+   font-family: sans-serif;
+   background-color: white;
+   font-size: 13px;
+}
+
+body {
+  max-width: 800px;
+  margin: auto;
+  padding: 1em;
+  line-height: 20px;
+}
+
+tt, code, pre {
+   font-family: 'DejaVu Sans Mono', 'Droid Sans Mono', 'Lucida Console', Consolas, Monaco, monospace;
+}
+
+h1 {
+   font-size:2.2em;
+}
+
+h2 {
+   font-size:1.8em;
+}
+
+h3 {
+   font-size:1.4em;
+}
+
+h4 {
+   font-size:1.0em;
+}
+
+h5 {
+   font-size:0.9em;
+}
+
+h6 {
+   font-size:0.8em;
+}
+
+a:visited {
+   color: rgb(50%, 0%, 50%);
+}
+
+pre, img {
+  max-width: 100%;
+}
+pre {
+  overflow-x: auto;
+}
+pre code {
+   display: block; padding: 0.5em;
+}
+
+code {
+  font-size: 92%;
+  border: 1px solid #ccc;
+}
+
+code[class] {
+  background-color: #F8F8F8;
+}
+
+table, td, th {
+  border: none;
+}
+
+blockquote {
+   color:#666666;
+   margin:0;
+   padding-left: 1em;
+   border-left: 0.5em #EEE solid;
+}
+
+hr {
+   height: 0px;
+   border-bottom: none;
+   border-top-width: thin;
+   border-top-style: dotted;
+   border-top-color: #999999;
+}
+
+@media print {
+   * {
+      background: transparent !important;
+      color: black !important;
+      filter:none !important;
+      -ms-filter: none !important;
+   }
+
+   body {
+      font-size:12pt;
+      max-width:100%;
+   }
+
+   a, a:visited {
+      text-decoration: underline;
+   }
+
+   hr {
+      visibility: hidden;
+      page-break-before: always;
+   }
+
+   pre, blockquote {
+      padding-right: 1em;
+      page-break-inside: avoid;
+   }
+
+   tr, img {
+      page-break-inside: avoid;
+   }
+
+   img {
+      max-width: 100% !important;
+   }
+
+   @page :left {
+      margin: 15mm 20mm 15mm 10mm;
+   }
+
+   @page :right {
+      margin: 15mm 10mm 15mm 20mm;
+   }
+
+   p, h2, h3 {
+      orphans: 3; widows: 3;
+   }
+
+   h2, h3 {
+      page-break-after: avoid;
+   }
+}
+</style>
+
+
+
+</head>
+
+<body>
+<p><center></p>
+
+<h1>Comparing Georgian Banks</h1>
+
+<h3><em>An example of web scraping, data wrangling and data visualization with R</em></h3>
+
+<p>by JS Gourdet  </p>
+
+<p><img src="http://www.iset.ge/blog/wp-content/uploads/2013/05/photo-v2-640x240.png" heigth=120 width=320 alt="Georgian Banks">
+</center></p>
+
+<h2>1. Objectives</h2>
+
+<p>Quarterly, financial reports of Georgian Banks are uploaded on the website of the National Bank of Georgia.<br/>
+A lot of semi-structured financial data are therefore publicly available.
+Let&#39;s use them to compare Georgian Banks from different points of view.    </p>
+
+<p>But how to exploit, transform and represent these data from the National Bank of Georgia website to a user-friendly charts ?<br/>
+This is the challenge that this document is addressing using the tool R. </p>
+
+<p><strong>Disclaimer</strong>: The objective of this document is not to provide an accurate financial analysis of the Georgian Banks, but just the technical steps to show how to leverage insights from available raw data. Only if high quality data of all banks were uploaded, there could be satisfying figures.  </p>
+
+<h2>2. Input</h2>
+
+<p>Data source for the analysis is the page &ldquo;<em>Financial Indices of Commercial Banks</em>&rdquo; of the National Bank of Georgia:
+<a href="https://www.nbg.gov.ge/index.php?m=404&amp;lng=eng">https://www.nbg.gov.ge/index.php?m=404&amp;lng=eng</a></p>
+
+<h2>3. Outputs: Motion charts (4D)</h2>
+
+<h3>3.1. Evolution of Banks&#39; Net Income, Total Assets and Personnel over time</h3>
+
+<p>The purpose of this chart is to show the evolution over time of the Banks&#39; net incomes (from profit &amp; loss statement) 
+according to their total assets (balance sheet) and sizing them (bubbles) by the size of their personnel (using personnel expenses from P&amp;L).</p>
+
+<p>However, as figures of profit &amp; loss statement are reset every year, it does not make sense to each quarterly reports over years, otherwise the chart would 
+look like a sawtooth-shaped chart. So only one quarter (the 3rd as the 4th is not available) is picked for each year. Then other quarters (incl. for the missing reports) are extrapolated (of course not very accurate and it would be better to use Q4).  </p>
+
+<p><strong>User guide:</strong><br/>
+<span style="color:blue">1. As the variable <strong><em>Size</em></strong> on the chart cannot be set automatically (bug), set it manually to the value &ldquo;<strong><em>StaffExpenses</em></strong>&rdquo;</span><br/>
+2. Press the button play (arrow) to visualize the motion chart.<br/>
+3. Each bubble represent a bank, click on bubble to see the bank name and trail can be enabled (right panel)<br/>
+4. You can change axis if you want but also visualize other chart using other tabs (top-right corner)  </p>
+
+<!-- MotionChart generated in R 3.2.0 by googleVis 0.5.8 package -->
+
+<!-- Mon Jun 08 01:21:02 2015 -->
+
+<!-- jsHeader -->
+
+<script type="text/javascript">
+ 
+// jsData 
+function gvisDataMotionChartID27f847ed6d67 () {
+var data = new google.visualization.DataTable();
+var datajson =
+[
+ [
+ "VTB BANK-GEORGIA",
+"2006Q3",
+473876164.7,
+4866724,
+7823027 
+],
+[
+ "TBC BANK",
+"2006Q3",
+907949543.6,
+16802605.36,
+12832576 
+],
+[
+ "CAPITAL BANK",
+"2006Q3",
+25320317,
+611768,
+890949 
+],
+[
+ "BANK OF GEORGIA",
+"2006Q3",
+844578684,
+13895113,
+19681213 
+],
+[
+ "PRIVATBANK",
+"2006Q3",
+21042663,
+576044,
+728741 
+],
+[
+ "CAUCASUSDEVELOPMENT BANK - GEORGIA",
+"2006Q3",
+14113117,
+-19020,
+59143 
+],
+[
+ "BANK REPUBLIC",
+"2006Q3",
+373143160.4,
+8120648.94,
+5600561 
+],
+[
+ "ZIRAAT BANKASI A.S. TBILISI BRANCH",
+"2006Q3",
+11708250,
+470477,
+345417 
+],
+[
+ "KOR STANDARD BANK",
+"2006Q3",
+113935743.2,
+822146.58,
+1150205 
+],
+[
+ "SILK ROAD BANK",
+"2006Q3",
+50536322.96,
+1074243.42,
+668695.45 
+],
+[
+ "CARTU BANK",
+"2006Q3",
+264946600,
+8613952,
+2797079 
+],
+[
+ "BASISBANK",
+"2006Q3",
+76238428,
+1681528,
+1486122 
+],
+[
+ "LIBERTY BANK",
+"2006Q3",
+111482294,
+2865481,
+7133857 
+],
+[
+ "PROCREDIT BANK",
+"2006Q3",
+417019990.4,
+4110815.69,
+10928865.57 
+],
+[
+ "BANK OF GEORGIA",
+"2007Q3",
+2267467983,
+35126371,
+42733266 
+],
+[
+ "PRIVATBANK",
+"2007Q3",
+89842302.2,
+-1015495,
+2038678 
+],
+[
+ "TBC BANK",
+"2007Q3",
+1663377411,
+16925416,
+20044461 
+],
+[
+ "SILK ROAD BANK",
+"2007Q3",
+147838997.4,
+2261817.48,
+1839454.87 
+],
+[
+ "THE INTERNATIONAL BANK OF AZERBAIJAN-GEORGIA",
+"2007Q3",
+19389924.05,
+-638996.7,
+224322 
+],
+[
+ "ZIRAAT BANKASI A.S. TBILISI BRANCH",
+"2007Q3",
+19559298,
+650716,
+413881 
+],
+[
+ "KOR STANDARD BANK",
+"2007Q3",
+174714505,
+2652308.91,
+3396858.87 
+],
+[
+ "VTB BANK-GEORGIA",
+"2007Q3",
+516288007.1,
+2914672,
+10002135 
+],
+[
+ "BASISBANK",
+"2007Q3",
+100335007,
+2605874,
+2056705 
+],
+[
+ "CAPITAL BANK",
+"2007Q3",
+34404496,
+828740,
+1139596 
+],
+[
+ "CAUCASUSDEVELOPMENT BANK - GEORGIA",
+"2007Q3",
+12897931,
+56219,
+154714 
+],
+[
+ "BANK REPUBLIC",
+"2007Q3",
+441915338.5,
+3971435.45,
+9988338.49 
+],
+[
+ "CARTU BANK",
+"2007Q3",
+386681714,
+10288059,
+4218128 
+],
+[
+ "LIBERTY BANK",
+"2007Q3",
+232348152,
+934249,
+11675732 
+],
+[
+ "PROCREDIT BANK",
+"2007Q3",
+498876308.4,
+7276916.16,
+15017266.06 
+],
+[
+ "LIBERTY BANK",
+"2008Q3",
+357093321.4,
+-1095982,
+19670911 
+],
+[
+ "THE INTERNATIONAL BANK OF AZERBAIJAN-GEORGIA",
+"2008Q3",
+38026364,
+1011883.22,
+550667.53 
+],
+[
+ "BANK CONSTANTA",
+"2008Q3",
+63535682.54,
+-2535186.34,
+5052948.78 
+],
+[
+ "BASISBANK",
+"2008Q3",
+108729411,
+1502723.44,
+3095209 
+],
+[
+ "CAUCASUSDEVELOPMENT BANK - GEORGIA",
+"2008Q3",
+13990501,
+-364226,
+243167 
+],
+[
+ "VTB BANK-GEORGIA",
+"2008Q3",
+411345953.6,
+-27374022,
+12688923 
+],
+[
+ "PROGRESS BANK",
+"2008Q3",
+13037095,
+-384353,
+808033 
+],
+[
+ "HALYK BANK GEORGIA",
+"2008Q3",
+31065153,
+-129576,
+1183164 
+],
+[
+ "SILK ROAD BANK",
+"2008Q3",
+140428063.9,
+1965437.57,
+3645269.22 
+],
+[
+ "BANK OF GEORGIA",
+"2008Q3",
+2706451816,
+-4876360,
+53609081 
+],
+[
+ "ZIRAAT BANKASI A.S. TBILISI BRANCH",
+"2008Q3",
+25067754,
+1933712,
+375946 
+],
+[
+ "PRIVATBANK",
+"2008Q3",
+274957519.6,
+-8073016.18,
+10431650 
+],
+[
+ "BANK REPUBLIC",
+"2008Q3",
+647586339.8,
+1656208.81,
+15645397.59 
+],
+[
+ "TBC BANK",
+"2008Q3",
+1953765001,
+3142812,
+33672717 
+],
+[
+ "CARTU BANK",
+"2008Q3",
+415217284,
+4129431,
+5437063 
+],
+[
+ "CAPITAL BANK",
+"2008Q3",
+24448351,
+332428,
+1291217 
+],
+[
+ "PROCREDIT BANK",
+"2008Q3",
+606344779.7,
+8355210.3,
+19539958.02 
+],
+[
+ "KOR STANDARD BANK",
+"2008Q3",
+250707439.7,
+-7049911.76,
+6339219.21 
+],
+[
+ "PROGRESS BANK",
+"2009Q3",
+12655791.21,
+-485051.87,
+849020 
+],
+[
+ "THE INTERNATIONAL BANK OF AZERBAIJAN-GEORGIA",
+"2009Q3",
+34887727.38,
+-598356.02,
+662004 
+],
+[
+ "BANK REPUBLIC",
+"2009Q3",
+747412597.1,
+-1190328.92,
+17315988.66 
+],
+[
+ "BANK OF GEORGIA",
+"2009Q3",
+2647087060,
+-9858267,
+45727939 
+],
+[
+ "CARTU BANK",
+"2009Q3",
+471467292,
+7160344,
+4482519 
+],
+[
+ "PROCREDIT BANK",
+"2009Q3",
+686376309.8,
+6793487.01,
+22566813.37 
+],
+[
+ "CAUCASUSDEVELOPMENT BANK - GEORGIA",
+"2009Q3",
+14481879,
+-84862,
+192524 
+],
+[
+ "ZIRAAT BANKASI A.S. TBILISI BRANCH",
+"2009Q3",
+22939431,
+770916,
+509283 
+],
+[
+ "VTB BANK-GEORGIA",
+"2009Q3",
+371467775.5,
+-12551526,
+12492049 
+],
+[
+ "HALYK BANK GEORGIA",
+"2009Q3",
+29444472,
+-2114173,
+1862844 
+],
+[
+ "BANK CONSTANTA",
+"2009Q3",
+61192518.37,
+660332.84,
+3956100.59 
+],
+[
+ "PRIVATBANK",
+"2009Q3",
+151110827.9,
+-41331774,
+10299455 
+],
+[
+ "BASISBANK",
+"2009Q3",
+122813000,
+-2384569.27,
+3241011 
+],
+[
+ "CAPITAL BANK",
+"2009Q3",
+9609851,
+-6211826,
+1422065 
+],
+[
+ "SILK ROAD BANK",
+"2009Q3",
+142556568.4,
+-3562606.56,
+4170091.99 
+],
+[
+ "TBC BANK",
+"2009Q3",
+1730968721,
+2417052.54,
+31984952.17 
+],
+[
+ "KOR STANDARD BANK",
+"2009Q3",
+240386917.5,
+-3091081.44,
+7037302 
+],
+[
+ "BANK REPUBLIC",
+"2010Q3",
+935747168.3,
+-27380564.13,
+18369333.6 
+],
+[
+ "BANK CONSTANTA",
+"2010Q3",
+79745760.47,
+1230780.33,
+4917373.06 
+],
+[
+ "TBC BANK",
+"2010Q3",
+2042598132,
+29697498,
+35306854 
+],
+[
+ "THE INTERNATIONAL BANK OF AZERBAIJAN-GEORGIA",
+"2010Q3",
+46535971.67,
+86934.69,
+774054.43 
+],
+[
+ "BASISBANK",
+"2010Q3",
+140390545.5,
+1895410.02,
+3761651.75 
+],
+[
+ "KOR STANDARD BANK",
+"2010Q3",
+297968370,
+-2704756.57,
+6648898.67 
+],
+[
+ "VTB BANK-GEORGIA",
+"2010Q3",
+353361030.7,
+-7734245,
+12533067 
+],
+[
+ "ZIRAAT BANKASI A.S. TBILISI BRANCH",
+"2010Q3",
+24457123,
+157451,
+526775 
+],
+[
+ "CAUCASUSDEVELOPMENT BANK - GEORGIA",
+"2010Q3",
+14071194,
+450921,
+175705 
+],
+[
+ "PROCREDIT BANK",
+"2010Q3",
+828460129.2,
+11195036.85,
+23033024.76 
+],
+[
+ "HALYK BANK GEORGIA",
+"2010Q3",
+31108358,
+-2142407,
+1486867 
+],
+[
+ "BANK OF GEORGIA",
+"2010Q3",
+3375929460,
+93339100,
+55303003 
+],
+[
+ "CAPITAL BANK",
+"2010Q3",
+15398529,
+416735,
+1000820 
+],
+[
+ "PRIVATBANK",
+"2010Q3",
+202313825.3,
+-5512051,
+10361891 
+],
+[
+ "SILK ROAD BANK",
+"2010Q3",
+100325601.8,
+-9520170.49,
+3242151.58 
+],
+[
+ "PROGRESS BANK",
+"2010Q3",
+13648484.02,
+290792.89,
+786098 
+],
+[
+ "CARTU BANK",
+"2010Q3",
+515549528,
+9501815,
+5500683 
+],
+[
+ "BANK CONSTANTA",
+"2011Q3",
+123712248.9,
+2246030,
+6535629.21 
+],
+[
+ "BANK REPUBLIC",
+"2011Q3",
+686038365.3,
+-8921293.24,
+18887172.86 
+],
+[
+ "CAUCASUSDEVELOPMENT BANK - GEORGIA",
+"2011Q3",
+15630874,
+1957695,
+191794 
+],
+[
+ "KOR STANDARD BANK",
+"2011Q3",
+362435905.6,
+2346099.35,
+6545310.27 
+],
+[
+ "ZIRAAT BANKASI A.S. TBILISI BRANCH",
+"2011Q3",
+23034660,
+571203,
+603935 
+],
+[
+ "THE INTERNATIONAL BANK OF AZERBAIJAN-GEORGIA",
+"2011Q3",
+100428086.8,
+1052529.59,
+955258.07 
+],
+[
+ "SILK ROAD BANK",
+"2011Q3",
+114329022.4,
+428074.61,
+3297753.53 
+],
+[
+ "CARTU BANK",
+"2011Q3",
+532444297,
+14181339,
+5384189 
+],
+[
+ "PROGRESS BANK",
+"2011Q3",
+14115202.05,
+115683.98,
+893188.02 
+],
+[
+ "VTB BANK-GEORGIA",
+"2011Q3",
+392813560.9,
+15756416,
+14094587 
+],
+[
+ "CAPITAL BANK",
+"2011Q3",
+23492081,
+-640630,
+900925 
+],
+[
+ "BANK OF GEORGIA",
+"2011Q3",
+4174281308,
+86606002,
+61674573 
+],
+[
+ "PROCREDIT BANK",
+"2011Q3",
+837289009.8,
+11327760.72,
+23749762.5 
+],
+[
+ "TBC BANK",
+"2011Q3",
+2979538033,
+69922210,
+46508408 
+],
+[
+ "PRIVATBANK",
+"2011Q3",
+391372108.6,
+3557186.03,
+16241296 
+],
+[
+ "HALYK BANK GEORGIA",
+"2011Q3",
+37289233,
+-231358,
+1643195 
+],
+[
+ "BANK OF GEORGIA",
+"2012Q3",
+5177594727,
+109052544,
+66393379 
+],
+[
+ "PRIVATBANK",
+"2012Q3",
+495757769,
+-6141974,
+12105959 
+],
+[
+ "PROCREDIT BANK",
+"2012Q3",
+1043116734,
+16569671.48,
+23930132.1 
+],
+[
+ "BANK CONSTANTA",
+"2012Q3",
+218561525.5,
+6308271.86,
+9154905.88 
+],
+[
+ "CARTU BANK",
+"2012Q3",
+307529056,
+-75123042,
+6736707 
+],
+[
+ "SILK ROAD BANK",
+"2012Q3",
+130668449.9,
+-3640193.99,
+3993446.68 
+],
+[
+ "TURKEY ISBANK A.S BATUMI BRANCH",
+"2012Q3",
+12297121.76,
+-100250.57,
+75276 
+],
+[
+ "THE INTERNATIONAL BANK OF AZERBAIJAN-GEORGIA",
+"2012Q3",
+128674858.3,
+4348054.81,
+1096972.23 
+],
+[
+ "LIBERTY BANK",
+"2012Q3",
+896304780.3,
+9432549,
+31933648 
+],
+[
+ "BASISBANK",
+"2012Q3",
+211198602.9,
+304492.2,
+4359919.2 
+],
+[
+ "CAPITAL BANK",
+"2012Q3",
+33527126,
+3725244,
+1636061 
+],
+[
+ "PROGRESS BANK",
+"2012Q3",
+18083122.88,
+-728004.84,
+1404371 
+],
+[
+ "HALYK BANK GEORGIA",
+"2012Q3",
+65033757.5,
+-839274,
+1875075 
+],
+[
+ "VTB BANK-GEORGIA",
+"2012Q3",
+476151464.4,
+8366785,
+16127741 
+],
+[
+ "ZIRAAT BANKASI A.S. TBILISI BRANCH",
+"2012Q3",
+24140370,
+139444,
+572438 
+],
+[
+ "TBC BANK",
+"2012Q3",
+3604451897,
+52256321.83,
+46219374.95 
+],
+[
+ "BANK REPUBLIC",
+"2012Q3",
+771792831.8,
+13025409.72,
+18277655.84 
+],
+[
+ "CAUCASUSDEVELOPMENT BANK - GEORGIA",
+"2012Q3",
+15159270,
+-483769,
+276917 
+],
+[
+ "KOR STANDARD BANK",
+"2012Q3",
+399977575,
+3704231.57,
+6927262.84 
+],
+[
+ "BANK OF GEORGIA",
+"2013Q3",
+5385578769,
+77639626.02,
+72145744.95 
+],
+[
+ "THE INTERNATIONAL BANK OF AZERBAIJAN-GEORGIA",
+"2013Q3",
+134652715.2,
+889705.64,
+957654.54 
+],
+[
+ "PROCREDIT BANK",
+"2013Q3",
+1001665187,
+12321896.81,
+21585323.63 
+],
+[
+ "TBC BANK",
+"2013Q3",
+3659793845,
+45384429.74,
+50409288.53 
+],
+[
+ "HALYK BANK GEORGIA",
+"2013Q3",
+106712505,
+470284,
+2166909 
+],
+[
+ "CARTU BANK",
+"2013Q3",
+477530632,
+48037236,
+5738941 
+],
+[
+ "PRIVATBANK",
+"2013Q3",
+486417627.6,
+26036602,
+13203100 
+],
+[
+ "CAUCASUSDEVELOPMENT BANK - GEORGIA",
+"2013Q3",
+17603673,
+58130,
+169027 
+],
+[
+ "KOR STANDARD BANK",
+"2013Q3",
+451542623.7,
+5449191.36,
+7356148 
+],
+[
+ "CAPITAL BANK",
+"2013Q3",
+30787319,
+-1879129,
+2311103 
+],
+[
+ "SILK ROAD BANK",
+"2013Q3",
+126832551.8,
+-3196107.31,
+4101102.67 
+],
+[
+ "VTB BANK-GEORGIA",
+"2013Q3",
+766046906,
+6967788,
+19863769 
+],
+[
+ "BANK CONSTANTA",
+"2013Q3",
+321379019.2,
+10302936.41,
+13860969.19 
+],
+[
+ "TURKEY ISBANK A.S BATUMI BRANCH",
+"2013Q3",
+25041756.98,
+-273488.92,
+498435.43 
+],
+[
+ "BANK REPUBLIC",
+"2013Q3",
+890813139.4,
+18687927.4,
+21678623.07 
+],
+[
+ "ZIRAAT BANKASI A.S. TBILISI BRANCH",
+"2013Q3",
+43551663,
+-203304,
+609110 
+],
+[
+ "BASISBANK",
+"2013Q3",
+348138060,
+6498013.44,
+4684525.74 
+],
+[
+ "PASHA BANK GEORGIA",
+"2013Q3",
+35826511.37,
+-1776577.9,
+1124048.28 
+],
+[
+ "LIBERTY BANK",
+"2013Q3",
+1297933906,
+18697117,
+28707713 
+],
+[
+ "SILK ROAD BANK",
+"2014Q3",
+123380427.1,
+-4191741.78,
+3685396.36 
+],
+[
+ "HALYK BANK GEORGIA",
+"2014Q3",
+151059110.8,
+1449031,
+2783965 
+],
+[
+ "VTB BANK-GEORGIA",
+"2014Q3",
+945308881.2,
+10177290,
+21712571 
+],
+[
+ "PASHA BANK GEORGIA",
+"2014Q3",
+132040708.4,
+-7945484.57,
+1512306.95 
+],
+[
+ "CAPITAL BANK",
+"2014Q3",
+47677268,
+-3794858,
+2066459 
+],
+[
+ "ZIRAAT BANKASI A.S. TBILISI BRANCH",
+"2014Q3",
+46941437,
+235805,
+828641 
+],
+[
+ "CAUCASUSDEVELOPMENT BANK - GEORGIA",
+"2014Q3",
+27372597,
+149029,
+424633 
+],
+[
+ "CARTU BANK",
+"2014Q3",
+681969282,
+25565156,
+5550572 
+],
+[
+ "FINCA BANK GEORGIA",
+"2014Q3",
+152008143.4,
+4918217.55,
+10599373.85 
+],
+[
+ "THE INTERNATIONAL BANK OF AZERBAIJAN-GEORGIA",
+"2014Q3",
+128150777.6,
+2539046.95,
+923025 
+],
+[
+ "BANK CONSTANTA",
+"2014Q3",
+414578577.3,
+12524610.33,
+16229996.54 
+],
+[
+ "KOR STANDARD BANK",
+"2014Q3",
+549228868.5,
+-8718452.36,
+6892442 
+],
+[
+ "LIBERTY BANK",
+"2014Q3",
+1571762742,
+17417938,
+34830022 
+],
+[
+ "TBC BANK",
+"2014Q3",
+4611324080,
+86109758.21,
+62857577.48 
+],
+[
+ "PROGRESS BANK",
+"2014Q3",
+80424867.49,
+-182921.52,
+2028525 
+],
+[
+ "BANK OF GEORGIA",
+"2014Q3",
+6049363372,
+115938682.4,
+80318500.01 
+],
+[
+ "BASISBANK",
+"2014Q3",
+609696047.6,
+11394481.77,
+5530881.49 
+],
+[
+ "PROCREDIT BANK",
+"2014Q3",
+1051627329,
+13482578.81,
+18784721.72 
+],
+[
+ "PRIVATBANK",
+"2014Q3",
+605653333.4,
+713667,
+14657903 
+],
+[
+ "BANK REPUBLIC",
+"2014Q3",
+1081494153,
+26013725.75,
+21151042.22 
+],
+[
+ "TURKEY ISBANK A.S BATUMI BRANCH",
+"2014Q3",
+54454945.3,
+-85875.05,
+1203303.99 
+] 
+];
+data.addColumn('string','Bank');
+data.addColumn('string','Quarter');
+data.addColumn('number','TotalAssets');
+data.addColumn('number','NetIncome');
+data.addColumn('number','StaffExpenses');
+data.addRows(datajson);
+return(data);
+}
+ 
+// jsDrawChart
+function drawChartMotionChartID27f847ed6d67() {
+var data = gvisDataMotionChartID27f847ed6d67();
+var options = {};
+options["width"] =    700;
+options["height"] =    400;
+options["state"] = "{\"colorOption\":\"_UNIQUE_COLOR\"};";
+
+    var chart = new google.visualization.MotionChart(
+    document.getElementById('MotionChartID27f847ed6d67')
+    );
+    chart.draw(data,options);
+    
+
+}
+  
+ 
+// jsDisplayChart
+(function() {
+var pkgs = window.__gvisPackages = window.__gvisPackages || [];
+var callbacks = window.__gvisCallbacks = window.__gvisCallbacks || [];
+var chartid = "motionchart";
+  
+// Manually see if chartid is in pkgs (not all browsers support Array.indexOf)
+var i, newPackage = true;
+for (i = 0; newPackage && i < pkgs.length; i++) {
+if (pkgs[i] === chartid)
+newPackage = false;
+}
+if (newPackage)
+  pkgs.push(chartid);
+  
+// Add the drawChart function to the global list of callbacks
+callbacks.push(drawChartMotionChartID27f847ed6d67);
+})();
+function displayChartMotionChartID27f847ed6d67() {
+  var pkgs = window.__gvisPackages = window.__gvisPackages || [];
+  var callbacks = window.__gvisCallbacks = window.__gvisCallbacks || [];
+  window.clearTimeout(window.__gvisLoad);
+  // The timeout is set to 100 because otherwise the container div we are
+  // targeting might not be part of the document yet
+  window.__gvisLoad = setTimeout(function() {
+  var pkgCount = pkgs.length;
+  google.load("visualization", "1", { packages:pkgs, callback: function() {
+  if (pkgCount != pkgs.length) {
+  // Race condition where another setTimeout call snuck in after us; if
+  // that call added a package, we must not shift its callback
+  return;
+}
+while (callbacks.length > 0)
+callbacks.shift()();
+} });
+}, 100);
+}
+ 
+// jsFooter
+</script>
+ 
+
+<!-- jsChart -->  
+
+<script type="text/javascript" src="https://www.google.com/jsapi?callback=displayChartMotionChartID27f847ed6d67"></script>
+ 
+
+<!-- divChart -->
+
+<div id="MotionChartID27f847ed6d67" 
+  style="width: 700; height: 400;">
+</div>
+
+<h3>3.2. Evolution of Banks&#39; Loans and Deposits market shares and Total Assets over time</h3>
+
+<p>The purpose of this chart is to show the evolution over time of the Banks&#39; deposits market shares according to loans market shares (using amount of loans and deposits from Balance Sheet) sizing them (bubbles) by their Total Assets (from Balance Sheet).  </p>
+
+<p>However, although the pattern and trends are interesting, figures are not accurate since some quarterly reports are missing time to time leading to wrong figures as the whole market is therefore not represented (which explains sometime some strange behaviors in the motion chart).  </p>
+
+<p><strong>User guide:</strong><br/>
+<span style="color:blue">1. As the variable <strong><em>Size</em></strong> on the chart cannot be set automatically (bug), set it manually to the value &ldquo;<strong><em>TotalAssets</em></strong>&rdquo;</span><br/>
+2. Press the button play (arrow) to visualize the motion chart.<br/>
+3. Each bubble represent a bank, click on bubble to see the bank name and trail can be enabled (right panel)<br/>
+4. You can change axis if you want but also visualize other chart using other tabs (top-right corner)   </p>
+
+<!-- MotionChart generated in R 3.2.0 by googleVis 0.5.8 package -->
+
+<!-- Mon Jun 08 01:21:02 2015 -->
+
+<!-- jsHeader -->
+
+<script type="text/javascript">
+ 
+// jsData 
+function gvisDataMotionChartID27f8285017b0 () {
+var data = new google.visualization.DataTable();
+var datajson =
+[
+ [
+ "VTB BANK-GEORGIA",
+"2006Q3",
+15.45,
+6.96,
+473876164.7 
+],
+[
+ "TBC BANK",
+"2006Q3",
+24.62,
+32.33,
+907949543.6 
+],
+[
+ "CAPITAL BANK",
+"2006Q3",
+0.73,
+0.81,
+25320317 
+],
+[
+ "BANK OF GEORGIA",
+"2006Q3",
+23.39,
+22.75,
+844578684 
+],
+[
+ "PRIVATBANK",
+"2006Q3",
+0.42,
+0.29,
+21042663 
+],
+[
+ "CAUCASUSDEVELOPMENT BANK - GEORGIA",
+"2006Q3",
+0.15,
+0,
+14113117 
+],
+[
+ "BANK REPUBLIC",
+"2006Q3",
+7.81,
+14.7,
+373143160.4 
+],
+[
+ "ZIRAAT BANKASI A.S. TBILISI BRANCH",
+"2006Q3",
+0,
+0.07,
+11708250 
+],
+[
+ "KOR STANDARD BANK",
+"2006Q3",
+1.9,
+1.44,
+113935743.2 
+],
+[
+ "SILK ROAD BANK",
+"2006Q3",
+1.42,
+0.6,
+50536322.96 
+],
+[
+ "CARTU BANK",
+"2006Q3",
+8.51,
+1.43,
+264946600 
+],
+[
+ "BASISBANK",
+"2006Q3",
+1.55,
+2.56,
+76238428 
+],
+[
+ "LIBERTY BANK",
+"2006Q3",
+1.69,
+0.9,
+111482294 
+],
+[
+ "PROCREDIT BANK",
+"2006Q3",
+12.35,
+15.17,
+417019990.4 
+],
+[
+ "VTB BANK-GEORGIA",
+"2006Q4",
+19.27,
+8.3,
+470361949 
+],
+[
+ "PRIVATBANK",
+"2006Q4",
+0.69,
+0.34,
+76202739 
+],
+[
+ "BASISBANK",
+"2006Q4",
+2.47,
+3.45,
+78828803.1 
+],
+[
+ "ZIRAAT BANKASI A.S. TBILISI BRANCH",
+"2006Q4",
+0,
+0.05,
+12789773 
+],
+[
+ "LIBERTY BANK",
+"2006Q4",
+2.49,
+1.38,
+111728107 
+],
+[
+ "CAUCASUSDEVELOPMENT BANK - GEORGIA",
+"2006Q4",
+0.21,
+0,
+24291100 
+],
+[
+ "BANK REPUBLIC",
+"2006Q4",
+9.74,
+19.32,
+350320851.8 
+],
+[
+ "SILK ROAD BANK",
+"2006Q4",
+2.2,
+1.36,
+63100710.8 
+],
+[
+ "CARTU BANK",
+"2006Q4",
+12.18,
+2.47,
+306342845 
+],
+[
+ "CAPITAL BANK",
+"2006Q4",
+0.74,
+1.01,
+25289730 
+],
+[
+ "PROCREDIT BANK",
+"2006Q4",
+16.17,
+18.52,
+433095032.9 
+],
+[
+ "KOR STANDARD BANK",
+"2006Q4",
+3.08,
+2.23,
+99532412.49 
+],
+[
+ "TBC BANK",
+"2006Q4",
+30.76,
+41.58,
+952310392.4 
+],
+[
+ "THE INTERNATIONAL BANK OF AZERBAIJAN-GEORGIA",
+"2007Q1",
+0,
+0,
+11939064 
+],
+[
+ "ZIRAAT BANKASI A.S. TBILISI BRANCH",
+"2007Q1",
+0,
+0.03,
+13533088 
+],
+[
+ "PRIVATBANK",
+"2007Q1",
+0.52,
+0.24,
+26309692.66 
+],
+[
+ "TBC BANK",
+"2007Q1",
+23.24,
+27.65,
+949294753.4 
+],
+[
+ "BANK REPUBLIC",
+"2007Q1",
+7.05,
+17.83,
+375742088.5 
+],
+[
+ "LIBERTY BANK",
+"2007Q1",
+1.82,
+1.23,
+157846633 
+],
+[
+ "BASISBANK",
+"2007Q1",
+1.72,
+1.66,
+81038912.94 
+],
+[
+ "VTB BANK-GEORGIA",
+"2007Q1",
+13.38,
+7.02,
+488136907 
+],
+[
+ "CAUCASUSDEVELOPMENT BANK - GEORGIA",
+"2007Q1",
+0.14,
+0,
+16405629 
+],
+[
+ "PROCREDIT BANK",
+"2007Q1",
+10.42,
+14.19,
+432888797 
+],
+[
+ "CAPITAL BANK",
+"2007Q1",
+0.47,
+0.36,
+30103136 
+],
+[
+ "BANK OF GEORGIA",
+"2007Q1",
+27.79,
+24.96,
+1547880885 
+],
+[
+ "KOR STANDARD BANK",
+"2007Q1",
+2.65,
+2.77,
+116624021.6 
+],
+[
+ "CARTU BANK",
+"2007Q1",
+9.13,
+1.48,
+317800178 
+],
+[
+ "SILK ROAD BANK",
+"2007Q1",
+1.69,
+0.57,
+71491230.4 
+],
+[
+ "TBC BANK",
+"2007Q2",
+25.14,
+28.82,
+1280110751 
+],
+[
+ "BANK OF GEORGIA",
+"2007Q2",
+31.02,
+29.81,
+1802746744 
+],
+[
+ "PRIVATBANK",
+"2007Q2",
+0.69,
+0.67,
+40913574.6 
+],
+[
+ "SILK ROAD BANK",
+"2007Q2",
+2.44,
+1.91,
+128576297.6 
+],
+[
+ "CARTU BANK",
+"2007Q2",
+8.41,
+1.11,
+353242417 
+],
+[
+ "ZIRAAT BANKASI A.S. TBILISI BRANCH",
+"2007Q2",
+0.01,
+0.02,
+18907463 
+],
+[
+ "CAPITAL BANK",
+"2007Q2",
+0.43,
+0.46,
+32459304 
+],
+[
+ "VTB BANK-GEORGIA",
+"2007Q2",
+11.59,
+6.34,
+496312457.1 
+],
+[
+ "CAUCASUSDEVELOPMENT BANK - GEORGIA",
+"2007Q2",
+0.13,
+0,
+14840314 
+],
+[
+ "PROCREDIT BANK",
+"2007Q2",
+9.41,
+11.99,
+449763883.8 
+],
+[
+ "THE INTERNATIONAL BANK OF AZERBAIJAN-GEORGIA",
+"2007Q2",
+0.03,
+0,
+19407105 
+],
+[
+ "BANK REPUBLIC",
+"2007Q2",
+5.97,
+14.16,
+475083563.8 
+],
+[
+ "BASISBANK",
+"2007Q2",
+1.57,
+1.66,
+89089239.06 
+],
+[
+ "KOR STANDARD BANK",
+"2007Q2",
+3.15,
+3.06,
+148534758.4 
+],
+[
+ "BANK OF GEORGIA",
+"2007Q3",
+31.09,
+30.82,
+2267467983 
+],
+[
+ "PRIVATBANK",
+"2007Q3",
+1.22,
+0.67,
+89842302.2 
+],
+[
+ "TBC BANK",
+"2007Q3",
+26.4,
+26.79,
+1663377411 
+],
+[
+ "SILK ROAD BANK",
+"2007Q3",
+2.49,
+2.54,
+147838997.4 
+],
+[
+ "THE INTERNATIONAL BANK OF AZERBAIJAN-GEORGIA",
+"2007Q3",
+0.17,
+0,
+19389924.05 
+],
+[
+ "ZIRAAT BANKASI A.S. TBILISI BRANCH",
+"2007Q3",
+0.01,
+0.01,
+19559298 
+],
+[
+ "KOR STANDARD BANK",
+"2007Q3",
+2.4,
+4.11,
+174714505 
+],
+[
+ "VTB BANK-GEORGIA",
+"2007Q3",
+9.52,
+6.4,
+516288007.1 
+],
+[
+ "BASISBANK",
+"2007Q3",
+1.49,
+1.32,
+100335007 
+],
+[
+ "CAPITAL BANK",
+"2007Q3",
+0.4,
+0.33,
+34404496 
+],
+[
+ "CAUCASUSDEVELOPMENT BANK - GEORGIA",
+"2007Q3",
+0.1,
+0,
+12897931 
+],
+[
+ "BANK REPUBLIC",
+"2007Q3",
+6.05,
+12.38,
+441915338.5 
+],
+[
+ "CARTU BANK",
+"2007Q3",
+7.87,
+0.93,
+386681714 
+],
+[
+ "LIBERTY BANK",
+"2007Q3",
+2.26,
+2.27,
+232348152 
+],
+[
+ "PROCREDIT BANK",
+"2007Q3",
+8.51,
+11.43,
+498876308.4 
+],
+[
+ "BANK OF GEORGIA",
+"2007Q4",
+33.65,
+32.39,
+2534082264 
+],
+[
+ "ZIRAAT BANKASI A.S. TBILISI BRANCH",
+"2007Q4",
+0.02,
+0,
+19157119 
+],
+[
+ "PROCREDIT BANK",
+"2007Q4",
+8.49,
+10.71,
+552232266.7 
+],
+[
+ "CAUCASUSDEVELOPMENT BANK - GEORGIA",
+"2007Q4",
+0.09,
+0,
+13271412 
+],
+[
+ "TBC BANK",
+"2007Q4",
+26.17,
+27.06,
+1706446464 
+],
+[
+ "SILK ROAD BANK",
+"2007Q4",
+2.56,
+4.17,
+176848862.1 
+],
+[
+ "BASISBANK",
+"2007Q4",
+1.44,
+1.44,
+102979437.9 
+],
+[
+ "BANK REPUBLIC",
+"2007Q4",
+7.04,
+11.87,
+503653217.7 
+],
+[
+ "PRIVATBANK",
+"2007Q4",
+1.75,
+1.73,
+129703741 
+],
+[
+ "LIBERTY BANK",
+"2007Q4",
+2.92,
+3.54,
+289607892 
+],
+[
+ "CARTU BANK",
+"2007Q4",
+7.81,
+0.98,
+393317912 
+],
+[
+ "THE INTERNATIONAL BANK OF AZERBAIJAN-GEORGIA",
+"2007Q4",
+0.2,
+0,
+62203812 
+],
+[
+ "VTB BANK-GEORGIA",
+"2007Q4",
+7.58,
+5.84,
+475354325.3 
+],
+[
+ "CAPITAL BANK",
+"2007Q4",
+0.29,
+0.27,
+27352761 
+],
+[
+ "CAPITAL BANK",
+"2008Q1",
+0.28,
+0.25,
+23301865 
+],
+[
+ "PROGRESS BANK",
+"2008Q1",
+0,
+0,
+12206897 
+],
+[
+ "ZIRAAT BANKASI A.S. TBILISI BRANCH",
+"2008Q1",
+0.02,
+0.01,
+19631456.98 
+],
+[
+ "BANK REPUBLIC",
+"2008Q1",
+7.54,
+11.83,
+598944059 
+],
+[
+ "BASISBANK",
+"2008Q1",
+1.37,
+1.17,
+96935980 
+],
+[
+ "HALYK BANK GEORGIA",
+"2008Q1",
+0,
+0,
+15999275 
+],
+[
+ "CAUCASUSDEVELOPMENT BANK - GEORGIA",
+"2008Q1",
+0.07,
+0,
+13801506 
+],
+[
+ "THE INTERNATIONAL BANK OF AZERBAIJAN-GEORGIA",
+"2008Q1",
+0.31,
+0,
+47940200 
+],
+[
+ "SILK ROAD BANK",
+"2008Q1",
+2.14,
+2.82,
+158128843.6 
+],
+[
+ "CARTU BANK",
+"2008Q1",
+7.1,
+1.06,
+428542804 
+],
+[
+ "PROCREDIT BANK",
+"2008Q1",
+8.11,
+10.29,
+561229745.7 
+],
+[
+ "VTB BANK-GEORGIA",
+"2008Q1",
+6.45,
+5.61,
+488328730.8 
+],
+[
+ "LIBERTY BANK",
+"2008Q1",
+3.25,
+4.55,
+355748639 
+],
+[
+ "KOR STANDARD BANK",
+"2008Q1",
+1.35,
+1.61,
+157928155.3 
+],
+[
+ "BANK OF GEORGIA",
+"2008Q1",
+32.55,
+30.62,
+2724690681 
+],
+[
+ "TBC BANK",
+"2008Q1",
+27.37,
+29.01,
+2064466845 
+],
+[
+ "PRIVATBANK",
+"2008Q1",
+2.1,
+1.18,
+207735134.3 
+],
+[
+ "PROGRESS BANK",
+"2008Q2",
+0,
+0,
+12051068 
+],
+[
+ "BASISBANK",
+"2008Q2",
+1.24,
+1.22,
+104592550.9 
+],
+[
+ "PRIVATBANK",
+"2008Q2",
+2.61,
+2.54,
+269052819.8 
+],
+[
+ "CARTU BANK",
+"2008Q2",
+6.29,
+0.9,
+442722052 
+],
+[
+ "CAUCASUSDEVELOPMENT BANK - GEORGIA",
+"2008Q2",
+0.07,
+0,
+13968018 
+],
+[
+ "CAPITAL BANK",
+"2008Q2",
+0.25,
+0.25,
+23329897 
+],
+[
+ "HALYK BANK GEORGIA",
+"2008Q2",
+0,
+0,
+15919438 
+],
+[
+ "THE INTERNATIONAL BANK OF AZERBAIJAN-GEORGIA",
+"2008Q2",
+0.41,
+0,
+36467533 
+],
+[
+ "LIBERTY BANK",
+"2008Q2",
+3.03,
+4.8,
+361460361.9 
+],
+[
+ "ZIRAAT BANKASI A.S. TBILISI BRANCH",
+"2008Q2",
+0.02,
+0.12,
+23834075 
+],
+[
+ "PROCREDIT BANK",
+"2008Q2",
+8.02,
+10.15,
+616406324 
+],
+[
+ "SILK ROAD BANK",
+"2008Q2",
+1.9,
+1.81,
+156384213.3 
+],
+[
+ "VTB BANK-GEORGIA",
+"2008Q2",
+5.8,
+5.05,
+433675361.4 
+],
+[
+ "KOR STANDARD BANK",
+"2008Q2",
+0.94,
+3.43,
+234683605.8 
+],
+[
+ "TBC BANK",
+"2008Q2",
+27.42,
+26.65,
+2202831435 
+],
+[
+ "BANK REPUBLIC",
+"2008Q2",
+8.33,
+9.88,
+667937967.9 
+],
+[
+ "BANK OF GEORGIA",
+"2008Q2",
+33.7,
+33.19,
+2925343062 
+],
+[
+ "LIBERTY BANK",
+"2008Q3",
+2.59,
+5.45,
+357093321.4 
+],
+[
+ "THE INTERNATIONAL BANK OF AZERBAIJAN-GEORGIA",
+"2008Q3",
+0.4,
+0,
+38026364 
+],
+[
+ "BANK CONSTANTA",
+"2008Q3",
+1.01,
+0.03,
+63535682.54 
+],
+[
+ "BASISBANK",
+"2008Q3",
+1.27,
+1.37,
+108729411 
+],
+[
+ "CAUCASUSDEVELOPMENT BANK - GEORGIA",
+"2008Q3",
+0.07,
+0,
+13990501 
+],
+[
+ "VTB BANK-GEORGIA",
+"2008Q3",
+5.95,
+4.6,
+411345953.6 
+],
+[
+ "PROGRESS BANK",
+"2008Q3",
+0,
+0,
+13037095 
+],
+[
+ "HALYK BANK GEORGIA",
+"2008Q3",
+0,
+0,
+31065153 
+],
+[
+ "SILK ROAD BANK",
+"2008Q3",
+1.79,
+0.56,
+140428063.9 
+],
+[
+ "BANK OF GEORGIA",
+"2008Q3",
+32.73,
+30.29,
+2706451816 
+],
+[
+ "ZIRAAT BANKASI A.S. TBILISI BRANCH",
+"2008Q3",
+0.03,
+0.04,
+25067754 
+],
+[
+ "PRIVATBANK",
+"2008Q3",
+2.91,
+3.4,
+274957519.6 
+],
+[
+ "BANK REPUBLIC",
+"2008Q3",
+9.34,
+10.22,
+647586339.8 
+],
+[
+ "TBC BANK",
+"2008Q3",
+25.52,
+27.55,
+1953765001 
+],
+[
+ "CARTU BANK",
+"2008Q3",
+6.34,
+1.27,
+415217284 
+],
+[
+ "CAPITAL BANK",
+"2008Q3",
+0.2,
+0.24,
+24448351 
+],
+[
+ "PROCREDIT BANK",
+"2008Q3",
+8.73,
+10.6,
+606344779.7 
+],
+[
+ "KOR STANDARD BANK",
+"2008Q3",
+1.14,
+4.39,
+250707439.7 
+],
+[
+ "PROCREDIT BANK",
+"2009Q1",
+9.89,
+12.44,
+675407845.8 
+],
+[
+ "SILK ROAD BANK",
+"2009Q1",
+2.02,
+1.84,
+154550639.3 
+],
+[
+ "CAUCASUSDEVELOPMENT BANK - GEORGIA",
+"2009Q1",
+0.06,
+0,
+13687052 
+],
+[
+ "CAPITAL BANK",
+"2009Q1",
+0.13,
+0.07,
+25895149 
+],
+[
+ "PROGRESS BANK",
+"2009Q1",
+0.12,
+0.01,
+12601668.94 
+],
+[
+ "BANK CONSTANTA",
+"2009Q1",
+0.93,
+0.03,
+59241498.36 
+],
+[
+ "TBC BANK",
+"2009Q1",
+23.83,
+28.15,
+1780314471 
+],
+[
+ "KOR STANDARD BANK",
+"2009Q1",
+1.77,
+4.59,
+254681584.4 
+],
+[
+ "HALYK BANK GEORGIA",
+"2009Q1",
+0,
+0.04,
+31050292 
+],
+[
+ "PRIVATBANK",
+"2009Q1",
+2.16,
+2.75,
+222788545 
+],
+[
+ "BANK OF GEORGIA",
+"2009Q1",
+33.42,
+29.8,
+2826196244 
+],
+[
+ "VTB BANK-GEORGIA",
+"2009Q1",
+6.12,
+4.29,
+424045356.6 
+],
+[
+ "ZIRAAT BANKASI A.S. TBILISI BRANCH",
+"2009Q1",
+0.03,
+0.03,
+21164924 
+],
+[
+ "CARTU BANK",
+"2009Q1",
+7.07,
+1.67,
+505667044 
+],
+[
+ "BASISBANK",
+"2009Q1",
+1.2,
+1.37,
+98482594 
+],
+[
+ "THE INTERNATIONAL BANK OF AZERBAIJAN-GEORGIA",
+"2009Q1",
+0.47,
+0,
+36308112 
+],
+[
+ "BANK REPUBLIC",
+"2009Q1",
+10.78,
+12.92,
+702225301 
+],
+[
+ "PROGRESS BANK",
+"2009Q2",
+0.1,
+0,
+13021909.18 
+],
+[
+ "BASISBANK",
+"2009Q2",
+1.23,
+1.56,
+103601859 
+],
+[
+ "SILK ROAD BANK",
+"2009Q2",
+1.96,
+1.46,
+144933319.6 
+],
+[
+ "PRIVATBANK",
+"2009Q2",
+1.87,
+2.5,
+181228793.8 
+],
+[
+ "BANK CONSTANTA",
+"2009Q2",
+0.98,
+0.03,
+60641571.98 
+],
+[
+ "TBC BANK",
+"2009Q2",
+22.71,
+28.33,
+1670148167 
+],
+[
+ "KOR STANDARD BANK",
+"2009Q2",
+2.22,
+4.28,
+233126489.4 
+],
+[
+ "THE INTERNATIONAL BANK OF AZERBAIJAN-GEORGIA",
+"2009Q2",
+0.41,
+0.61,
+41631025 
+],
+[
+ "PROCREDIT BANK",
+"2009Q2",
+10.61,
+12.34,
+658693267.8 
+],
+[
+ "BANK OF GEORGIA",
+"2009Q2",
+32.7,
+28.56,
+2598237606 
+],
+[
+ "HALYK BANK GEORGIA",
+"2009Q2",
+0.01,
+0.04,
+30510220 
+],
+[
+ "BANK REPUBLIC",
+"2009Q2",
+11.09,
+15.16,
+756867433.2 
+],
+[
+ "VTB BANK-GEORGIA",
+"2009Q2",
+6.07,
+3.38,
+374530032.4 
+],
+[
+ "CAPITAL BANK",
+"2009Q2",
+0.13,
+0.01,
+8898657 
+],
+[
+ "ZIRAAT BANKASI A.S. TBILISI BRANCH",
+"2009Q2",
+0.03,
+0.03,
+22680675 
+],
+[
+ "CARTU BANK",
+"2009Q2",
+7.81,
+1.71,
+442331182 
+],
+[
+ "CAUCASUSDEVELOPMENT BANK - GEORGIA",
+"2009Q2",
+0.07,
+0,
+14199572 
+],
+[
+ "PROGRESS BANK",
+"2009Q3",
+0.13,
+0,
+12655791.21 
+],
+[
+ "THE INTERNATIONAL BANK OF AZERBAIJAN-GEORGIA",
+"2009Q3",
+0.45,
+0.01,
+34887727.38 
+],
+[
+ "BANK REPUBLIC",
+"2009Q3",
+11.01,
+13.07,
+747412597.1 
+],
+[
+ "BANK OF GEORGIA",
+"2009Q3",
+31.96,
+28.88,
+2647087060 
+],
+[
+ "CARTU BANK",
+"2009Q3",
+8.2,
+2.62,
+471467292 
+],
+[
+ "PROCREDIT BANK",
+"2009Q3",
+10.99,
+12.29,
+686376309.8 
+],
+[
+ "CAUCASUSDEVELOPMENT BANK - GEORGIA",
+"2009Q3",
+0.07,
+0,
+14481879 
+],
+[
+ "ZIRAAT BANKASI A.S. TBILISI BRANCH",
+"2009Q3",
+0.03,
+0.02,
+22939431 
+],
+[
+ "VTB BANK-GEORGIA",
+"2009Q3",
+6.29,
+3.12,
+371467775.5 
+],
+[
+ "HALYK BANK GEORGIA",
+"2009Q3",
+0.01,
+0.04,
+29444472 
+],
+[
+ "BANK CONSTANTA",
+"2009Q3",
+1.1,
+0.01,
+61192518.37 
+],
+[
+ "PRIVATBANK",
+"2009Q3",
+1.55,
+2.1,
+151110827.9 
+],
+[
+ "BASISBANK",
+"2009Q3",
+1.2,
+1.82,
+122813000 
+],
+[
+ "CAPITAL BANK",
+"2009Q3",
+0.13,
+0.02,
+9609851 
+],
+[
+ "SILK ROAD BANK",
+"2009Q3",
+1.99,
+1.31,
+142556568.4 
+],
+[
+ "TBC BANK",
+"2009Q3",
+22.43,
+30.3,
+1730968721 
+],
+[
+ "KOR STANDARD BANK",
+"2009Q3",
+2.46,
+4.39,
+240386917.5 
+],
+[
+ "BANK OF GEORGIA",
+"2010Q1",
+33.34,
+31.03,
+2908223176 
+],
+[
+ "PROGRESS BANK",
+"2010Q1",
+0.17,
+0.01,
+13227220.95 
+],
+[
+ "ZIRAAT BANKASI A.S. TBILISI BRANCH",
+"2010Q1",
+0.02,
+0.04,
+22227391 
+],
+[
+ "BANK CONSTANTA",
+"2010Q1",
+1.23,
+0,
+71255730.69 
+],
+[
+ "VTB BANK-GEORGIA",
+"2010Q1",
+5.8,
+3.03,
+414894012.5 
+],
+[
+ "SILK ROAD BANK",
+"2010Q1",
+0.96,
+0.32,
+102571846.9 
+],
+[
+ "CAPITAL BANK",
+"2010Q1",
+0.24,
+0.01,
+19730817 
+],
+[
+ "PRIVATBANK",
+"2010Q1",
+1.65,
+2.76,
+176398545.1 
+],
+[
+ "TBC BANK",
+"2010Q1",
+23.05,
+32.19,
+1802834754 
+],
+[
+ "BANK REPUBLIC",
+"2010Q1",
+9.6,
+11.06,
+738417897 
+],
+[
+ "KOR STANDARD BANK",
+"2010Q1",
+3.34,
+3.9,
+304234256.4 
+],
+[
+ "BASISBANK",
+"2010Q1",
+1.49,
+1.82,
+117279193 
+],
+[
+ "HALYK BANK GEORGIA",
+"2010Q1",
+0,
+0.05,
+27532723 
+],
+[
+ "PROCREDIT BANK",
+"2010Q1",
+11.01,
+12.68,
+770686251.2 
+],
+[
+ "THE INTERNATIONAL BANK OF AZERBAIJAN-GEORGIA",
+"2010Q1",
+0.37,
+0.01,
+34387786.48 
+],
+[
+ "CARTU BANK",
+"2010Q1",
+7.66,
+1.09,
+455909319 
+],
+[
+ "CAUCASUSDEVELOPMENT BANK - GEORGIA",
+"2010Q1",
+0.07,
+0,
+13914963 
+],
+[
+ "SILK ROAD BANK",
+"2010Q2",
+0.84,
+0.34,
+105486503.5 
+],
+[
+ "CARTU BANK",
+"2010Q2",
+7.77,
+1.7,
+484717828 
+],
+[
+ "KOR STANDARD BANK",
+"2010Q2",
+3.42,
+3.46,
+315513203 
+],
+[
+ "PRIVATBANK",
+"2010Q2",
+1.7,
+3.4,
+202362257.8 
+],
+[
+ "CAUCASUSDEVELOPMENT BANK - GEORGIA",
+"2010Q2",
+0.07,
+0,
+14022073 
+],
+[
+ "BANK REPUBLIC",
+"2010Q2",
+8.61,
+11.08,
+751174985.7 
+],
+[
+ "TBC BANK",
+"2010Q2",
+24.54,
+32.79,
+1972345929 
+],
+[
+ "ZIRAAT BANKASI A.S. TBILISI BRANCH",
+"2010Q2",
+0.02,
+0.02,
+22319904 
+],
+[
+ "BANK OF GEORGIA",
+"2010Q2",
+34.65,
+31.33,
+3232304054 
+],
+[
+ "PROCREDIT BANK",
+"2010Q2",
+11.02,
+12.6,
+804314369.9 
+],
+[
+ "VTB BANK-GEORGIA",
+"2010Q2",
+5.35,
+3.19,
+430210266.2 
+],
+[
+ "THE INTERNATIONAL BANK OF AZERBAIJAN-GEORGIA",
+"2010Q2",
+0.33,
+0.01,
+36890798.7 
+],
+[
+ "PROGRESS BANK",
+"2010Q2",
+0.18,
+0.01,
+13288169.53 
+],
+[
+ "HALYK BANK GEORGIA",
+"2010Q2",
+0.02,
+0.06,
+26963246 
+],
+[
+ "CAPITAL BANK",
+"2010Q2",
+0.23,
+0.01,
+17073114 
+],
+[
+ "BANK CONSTANTA",
+"2010Q2",
+1.27,
+0,
+77302085.27 
+],
+[
+ "BANK REPUBLIC",
+"2010Q3",
+7.54,
+9.95,
+935747168.3 
+],
+[
+ "BANK CONSTANTA",
+"2010Q3",
+1.25,
+0,
+79745760.47 
+],
+[
+ "TBC BANK",
+"2010Q3",
+24.92,
+32.14,
+2042598132 
+],
+[
+ "THE INTERNATIONAL BANK OF AZERBAIJAN-GEORGIA",
+"2010Q3",
+0.6,
+0.5,
+46535971.67 
+],
+[
+ "BASISBANK",
+"2010Q3",
+1.29,
+2.01,
+140390545.5 
+],
+[
+ "KOR STANDARD BANK",
+"2010Q3",
+2.95,
+3.05,
+297968370 
+],
+[
+ "VTB BANK-GEORGIA",
+"2010Q3",
+4.2,
+3.13,
+353361030.7 
+],
+[
+ "ZIRAAT BANKASI A.S. TBILISI BRANCH",
+"2010Q3",
+0.02,
+0.04,
+24457123 
+],
+[
+ "CAUCASUSDEVELOPMENT BANK - GEORGIA",
+"2010Q3",
+0.06,
+0,
+14071194 
+],
+[
+ "PROCREDIT BANK",
+"2010Q3",
+10.8,
+12.12,
+828460129.2 
+],
+[
+ "HALYK BANK GEORGIA",
+"2010Q3",
+0.13,
+0.19,
+31108358 
+],
+[
+ "BANK OF GEORGIA",
+"2010Q3",
+35.77,
+31.64,
+3375929460 
+],
+[
+ "CAPITAL BANK",
+"2010Q3",
+0.22,
+0.04,
+15398529 
+],
+[
+ "PRIVATBANK",
+"2010Q3",
+1.72,
+3.04,
+202313825.3 
+],
+[
+ "SILK ROAD BANK",
+"2010Q3",
+0.83,
+0.25,
+100325601.8 
+],
+[
+ "PROGRESS BANK",
+"2010Q3",
+0.16,
+0.01,
+13648484.02 
+],
+[
+ "CARTU BANK",
+"2010Q3",
+7.54,
+1.9,
+515549528 
+],
+[
+ "ZIRAAT BANKASI A.S. TBILISI BRANCH",
+"2011Q1",
+0.02,
+0.04,
+24923316 
+],
+[
+ "CAUCASUSDEVELOPMENT BANK - GEORGIA",
+"2011Q1",
+0.02,
+0,
+15500332 
+],
+[
+ "SILK ROAD BANK",
+"2011Q1",
+0.85,
+0.24,
+107376458 
+],
+[
+ "THE INTERNATIONAL BANK OF AZERBAIJAN-GEORGIA",
+"2011Q1",
+0.6,
+0.41,
+50708034.63 
+],
+[
+ "PROCREDIT BANK",
+"2011Q1",
+9.66,
+10.55,
+802176692.3 
+],
+[
+ "BANK REPUBLIC",
+"2011Q1",
+6.91,
+7.64,
+677932258.6 
+],
+[
+ "BASISBANK",
+"2011Q1",
+1.28,
+1.77,
+139600861 
+],
+[
+ "PROGRESS BANK",
+"2011Q1",
+0.19,
+0.02,
+14578361.42 
+],
+[
+ "CARTU BANK",
+"2011Q1",
+6.9,
+1.32,
+546799184 
+],
+[
+ "VTB BANK-GEORGIA",
+"2011Q1",
+3.7,
+2.6,
+377921859.6 
+],
+[
+ "KOR STANDARD BANK",
+"2011Q1",
+2.62,
+2.36,
+300695809 
+],
+[
+ "PRIVATBANK",
+"2011Q1",
+2.17,
+2.59,
+257996977.2 
+],
+[
+ "BANK OF GEORGIA",
+"2011Q1",
+37.63,
+37.01,
+3809497903 
+],
+[
+ "CAPITAL BANK",
+"2011Q1",
+0.19,
+0.04,
+15671248 
+],
+[
+ "BANK CONSTANTA",
+"2011Q1",
+1.33,
+0.05,
+98796728.63 
+],
+[
+ "TBC BANK",
+"2011Q1",
+25.72,
+33.18,
+2455518587 
+],
+[
+ "HALYK BANK GEORGIA",
+"2011Q1",
+0.2,
+0.16,
+33347151 
+],
+[
+ "SILK ROAD BANK",
+"2011Q2",
+0.86,
+0.32,
+106570644.5 
+],
+[
+ "ZIRAAT BANKASI A.S. TBILISI BRANCH",
+"2011Q2",
+0.02,
+0.03,
+22785614 
+],
+[
+ "BANK REPUBLIC",
+"2011Q2",
+6.28,
+6.71,
+646421369.5 
+],
+[
+ "TBC BANK",
+"2011Q2",
+27.07,
+35.22,
+2645425073 
+],
+[
+ "VTB BANK-GEORGIA",
+"2011Q2",
+3.58,
+2.29,
+370609436.1 
+],
+[
+ "PRIVATBANK",
+"2011Q2",
+2.71,
+1.9,
+319833783.1 
+],
+[
+ "CAUCASUSDEVELOPMENT BANK - GEORGIA",
+"2011Q2",
+0.03,
+0.01,
+15661986 
+],
+[
+ "BANK CONSTANTA",
+"2011Q2",
+1.42,
+0.14,
+113618651 
+],
+[
+ "BANK OF GEORGIA",
+"2011Q2",
+38.81,
+38.74,
+4046151026 
+],
+[
+ "PROGRESS BANK",
+"2011Q2",
+0.17,
+0.02,
+14473034 
+],
+[
+ "CARTU BANK",
+"2011Q2",
+6.44,
+1.48,
+520154152 
+],
+[
+ "PROCREDIT BANK",
+"2011Q2",
+9.25,
+9.98,
+822602689.8 
+],
+[
+ "THE INTERNATIONAL BANK OF AZERBAIJAN-GEORGIA",
+"2011Q2",
+0.58,
+0.36,
+61925402.97 
+],
+[
+ "HALYK BANK GEORGIA",
+"2011Q2",
+0.2,
+0.15,
+46645994 
+],
+[
+ "KOR STANDARD BANK",
+"2011Q2",
+2.39,
+2.61,
+317261921 
+],
+[
+ "CAPITAL BANK",
+"2011Q2",
+0.18,
+0.04,
+31044231 
+],
+[
+ "BANK CONSTANTA",
+"2011Q3",
+1.5,
+0.21,
+123712248.9 
+],
+[
+ "BANK REPUBLIC",
+"2011Q3",
+5.87,
+6.27,
+686038365.3 
+],
+[
+ "CAUCASUSDEVELOPMENT BANK - GEORGIA",
+"2011Q3",
+0.02,
+0,
+15630874 
+],
+[
+ "KOR STANDARD BANK",
+"2011Q3",
+2.44,
+2.45,
+362435905.6 
+],
+[
+ "ZIRAAT BANKASI A.S. TBILISI BRANCH",
+"2011Q3",
+0.03,
+0.04,
+23034660 
+],
+[
+ "THE INTERNATIONAL BANK OF AZERBAIJAN-GEORGIA",
+"2011Q3",
+0.81,
+0.36,
+100428086.8 
+],
+[
+ "SILK ROAD BANK",
+"2011Q3",
+0.88,
+0.39,
+114329022.4 
+],
+[
+ "CARTU BANK",
+"2011Q3",
+5.92,
+1.37,
+532444297 
+],
+[
+ "PROGRESS BANK",
+"2011Q3",
+0.16,
+0.02,
+14115202.05 
+],
+[
+ "VTB BANK-GEORGIA",
+"2011Q3",
+3.73,
+2.25,
+392813560.9 
+],
+[
+ "CAPITAL BANK",
+"2011Q3",
+0.06,
+0.04,
+23492081 
+],
+[
+ "BANK OF GEORGIA",
+"2011Q3",
+38.04,
+36.78,
+4174281308 
+],
+[
+ "PROCREDIT BANK",
+"2011Q3",
+9.12,
+9.83,
+837289009.8 
+],
+[
+ "TBC BANK",
+"2011Q3",
+27.77,
+37.63,
+2979538033 
+],
+[
+ "PRIVATBANK",
+"2011Q3",
+3.48,
+2.23,
+391372108.6 
+],
+[
+ "HALYK BANK GEORGIA",
+"2011Q3",
+0.19,
+0.14,
+37289233 
+],
+[
+ "TBC BANK",
+"2012Q1",
+28.25,
+38.79,
+3355709328 
+],
+[
+ "CAPITAL BANK",
+"2012Q1",
+0.06,
+0.05,
+34317701 
+],
+[
+ "SILK ROAD BANK",
+"2012Q1",
+1,
+0.61,
+120042869.7 
+],
+[
+ "KOR STANDARD BANK",
+"2012Q1",
+2.83,
+2.19,
+396891647.8 
+],
+[
+ "VTB BANK-GEORGIA",
+"2012Q1",
+4.03,
+2.26,
+429214617.7 
+],
+[
+ "HALYK BANK GEORGIA",
+"2012Q1",
+0.3,
+0.13,
+49065577.8 
+],
+[
+ "PROGRESS BANK",
+"2012Q1",
+0.15,
+0.02,
+19465876 
+],
+[
+ "BANK CONSTANTA",
+"2012Q1",
+1.97,
+0.47,
+173420726.6 
+],
+[
+ "THE INTERNATIONAL BANK OF AZERBAIJAN-GEORGIA",
+"2012Q1",
+0.95,
+0.26,
+92478299.65 
+],
+[
+ "PRIVATBANK",
+"2012Q1",
+3.07,
+2.21,
+470333011 
+],
+[
+ "CARTU BANK",
+"2012Q1",
+3.23,
+0.7,
+343523646 
+],
+[
+ "CAUCASUSDEVELOPMENT BANK - GEORGIA",
+"2012Q1",
+0.01,
+0,
+13965962 
+],
+[
+ "BANK REPUBLIC",
+"2012Q1",
+5.97,
+5.65,
+685358883.5 
+],
+[
+ "BASISBANK",
+"2012Q1",
+1.03,
+1.69,
+153799793.4 
+],
+[
+ "BANK OF GEORGIA",
+"2012Q1",
+37.37,
+36.03,
+4296218082 
+],
+[
+ "PROCREDIT BANK",
+"2012Q1",
+9.76,
+8.89,
+965148292.8 
+],
+[
+ "ZIRAAT BANKASI A.S. TBILISI BRANCH",
+"2012Q1",
+0.03,
+0.05,
+25794311 
+],
+[
+ "BANK OF GEORGIA",
+"2012Q2",
+38.16,
+37.46,
+4676267575 
+],
+[
+ "HALYK BANK GEORGIA",
+"2012Q2",
+0.32,
+0.12,
+54019817 
+],
+[
+ "SILK ROAD BANK",
+"2012Q2",
+1.01,
+0.64,
+125302803 
+],
+[
+ "BANK CONSTANTA",
+"2012Q2",
+2.07,
+0.83,
+209090296.3 
+],
+[
+ "ZIRAAT BANKASI A.S. TBILISI BRANCH",
+"2012Q2",
+0.02,
+0.02,
+23262058 
+],
+[
+ "CARTU BANK",
+"2012Q2",
+3.23,
+0.49,
+324802437 
+],
+[
+ "THE INTERNATIONAL BANK OF AZERBAIJAN-GEORGIA",
+"2012Q2",
+0.8,
+0.22,
+86748207.03 
+],
+[
+ "PRIVATBANK",
+"2012Q2",
+2.72,
+2.08,
+485170391.4 
+],
+[
+ "PROCREDIT BANK",
+"2012Q2",
+9.4,
+9.32,
+996521400.1 
+],
+[
+ "TBC BANK",
+"2012Q2",
+28.68,
+36,
+3458316996 
+],
+[
+ "PROGRESS BANK",
+"2012Q2",
+0.17,
+0.03,
+18927402.42 
+],
+[
+ "BASISBANK",
+"2012Q2",
+1,
+1.81,
+173816095.2 
+],
+[
+ "CAPITAL BANK",
+"2012Q2",
+0.05,
+0.05,
+36931031 
+],
+[
+ "CAUCASUSDEVELOPMENT BANK - GEORGIA",
+"2012Q2",
+0.03,
+0,
+14153412 
+],
+[
+ "VTB BANK-GEORGIA",
+"2012Q2",
+3.94,
+2.71,
+444994584.2 
+],
+[
+ "BANK REPUBLIC",
+"2012Q2",
+5.7,
+5.42,
+728389188.2 
+],
+[
+ "KOR STANDARD BANK",
+"2012Q2",
+2.71,
+2.8,
+390828387.3 
+],
+[
+ "BANK OF GEORGIA",
+"2012Q3",
+36.34,
+35.43,
+5177594727 
+],
+[
+ "PRIVATBANK",
+"2012Q3",
+2.43,
+1.87,
+495757769 
+],
+[
+ "PROCREDIT BANK",
+"2012Q3",
+8.77,
+8.25,
+1043116734 
+],
+[
+ "BANK CONSTANTA",
+"2012Q3",
+2,
+0.89,
+218561525.5 
+],
+[
+ "CARTU BANK",
+"2012Q3",
+2.84,
+0.33,
+307529056 
+],
+[
+ "SILK ROAD BANK",
+"2012Q3",
+0.97,
+0.56,
+130668449.9 
+],
+[
+ "TURKEY ISBANK A.S BATUMI BRANCH",
+"2012Q3",
+0,
+0,
+12297121.76 
+],
+[
+ "THE INTERNATIONAL BANK OF AZERBAIJAN-GEORGIA",
+"2012Q3",
+1.11,
+0.19,
+128674858.3 
+],
+[
+ "LIBERTY BANK",
+"2012Q3",
+5.21,
+3.67,
+896304780.3 
+],
+[
+ "BASISBANK",
+"2012Q3",
+0.89,
+1.69,
+211198602.9 
+],
+[
+ "CAPITAL BANK",
+"2012Q3",
+0.08,
+0.04,
+33527126 
+],
+[
+ "PROGRESS BANK",
+"2012Q3",
+0.16,
+0.01,
+18083122.88 
+],
+[
+ "HALYK BANK GEORGIA",
+"2012Q3",
+0.45,
+0.12,
+65033757.5 
+],
+[
+ "VTB BANK-GEORGIA",
+"2012Q3",
+3.87,
+2.59,
+476151464.4 
+],
+[
+ "ZIRAAT BANKASI A.S. TBILISI BRANCH",
+"2012Q3",
+0.02,
+0.04,
+24140370 
+],
+[
+ "TBC BANK",
+"2012Q3",
+26.45,
+36.48,
+3604451897 
+],
+[
+ "BANK REPUBLIC",
+"2012Q3",
+5.74,
+5.27,
+771792831.8 
+],
+[
+ "CAUCASUSDEVELOPMENT BANK - GEORGIA",
+"2012Q3",
+0.03,
+0,
+15159270 
+],
+[
+ "KOR STANDARD BANK",
+"2012Q3",
+2.62,
+2.58,
+399977575 
+],
+[
+ "BASISBANK",
+"2013Q1",
+1.34,
+1.51,
+216963704.6 
+],
+[
+ "THE INTERNATIONAL BANK OF AZERBAIJAN-GEORGIA",
+"2013Q1",
+1.27,
+0.16,
+144947385.1 
+],
+[
+ "PROCREDIT BANK",
+"2013Q1",
+8.49,
+8.1,
+1011003430 
+],
+[
+ "HALYK BANK GEORGIA",
+"2013Q1",
+0.62,
+0.11,
+77036965.5 
+],
+[
+ "LIBERTY BANK",
+"2013Q1",
+4.96,
+6.07,
+991292022 
+],
+[
+ "VTB BANK-GEORGIA",
+"2013Q1",
+4.47,
+3.11,
+560816400.5 
+],
+[
+ "PASHA BANK GEORGIA",
+"2013Q1",
+0,
+0,
+34842517.93 
+],
+[
+ "BANK OF GEORGIA",
+"2013Q1",
+34.61,
+33.91,
+5090630491 
+],
+[
+ "PRIVATBANK",
+"2013Q1",
+2.53,
+2.22,
+426078943.5 
+],
+[
+ "PROGRESS BANK",
+"2013Q1",
+0.23,
+0.07,
+29470918.1 
+],
+[
+ "SILK ROAD BANK",
+"2013Q1",
+0.87,
+0.5,
+122215922.6 
+],
+[
+ "CAUCASUSDEVELOPMENT BANK - GEORGIA",
+"2013Q1",
+0.06,
+0,
+16618130 
+],
+[
+ "BANK CONSTANTA",
+"2013Q1",
+2.6,
+1.14,
+272317334 
+],
+[
+ "TBC BANK",
+"2013Q1",
+25.43,
+34.6,
+3444353010 
+],
+[
+ "KOR STANDARD BANK",
+"2013Q1",
+2.58,
+2.57,
+392904620.3 
+],
+[
+ "BANK REPUBLIC",
+"2013Q1",
+6.62,
+5.13,
+810837753.2 
+],
+[
+ "CARTU BANK",
+"2013Q1",
+3.18,
+0.7,
+397610691 
+],
+[
+ "TURKEY ISBANK A.S BATUMI BRANCH",
+"2013Q1",
+0.02,
+0,
+13928365.48 
+],
+[
+ "CAPITAL BANK",
+"2013Q1",
+0.09,
+0.03,
+36891861 
+],
+[
+ "ZIRAAT BANKASI A.S. TBILISI BRANCH",
+"2013Q1",
+0.02,
+0.08,
+28287740 
+],
+[
+ "PROGRESS BANK",
+"2013Q2",
+0.29,
+0.24,
+39774233.67 
+],
+[
+ "BANK OF GEORGIA",
+"2013Q2",
+34.51,
+33.02,
+5179094311 
+],
+[
+ "SILK ROAD BANK",
+"2013Q2",
+0.75,
+0.54,
+127119259.6 
+],
+[
+ "HALYK BANK GEORGIA",
+"2013Q2",
+0.67,
+0.07,
+103671343.1 
+],
+[
+ "BANK REPUBLIC",
+"2013Q2",
+6.52,
+5.1,
+847620672.5 
+],
+[
+ "KOR STANDARD BANK",
+"2013Q2",
+2.55,
+2.84,
+415569631.8 
+],
+[
+ "PROCREDIT BANK",
+"2013Q2",
+7.75,
+7.34,
+979755302.8 
+],
+[
+ "LIBERTY BANK",
+"2013Q2",
+5.41,
+6.37,
+1148541040 
+],
+[
+ "CAPITAL BANK",
+"2013Q2",
+0.09,
+0.03,
+31851835 
+],
+[
+ "BASISBANK",
+"2013Q2",
+1.59,
+2.43,
+342770682.3 
+],
+[
+ "TBC BANK",
+"2013Q2",
+24.76,
+33.24,
+3654605058 
+],
+[
+ "ZIRAAT BANKASI A.S. TBILISI BRANCH",
+"2013Q2",
+0.03,
+0.1,
+34684829 
+],
+[
+ "PASHA BANK GEORGIA",
+"2013Q2",
+0.01,
+0,
+34367055 
+],
+[
+ "CAUCASUSDEVELOPMENT BANK - GEORGIA",
+"2013Q2",
+0.05,
+0,
+15734963 
+],
+[
+ "BANK CONSTANTA",
+"2013Q2",
+2.77,
+1.06,
+301764067.4 
+],
+[
+ "PRIVATBANK",
+"2013Q2",
+2.49,
+2.86,
+462927098.4 
+],
+[
+ "CARTU BANK",
+"2013Q2",
+3.46,
+1.06,
+414432932 
+],
+[
+ "TURKEY ISBANK A.S BATUMI BRANCH",
+"2013Q2",
+0.15,
+0,
+26825371.41 
+],
+[
+ "THE INTERNATIONAL BANK OF AZERBAIJAN-GEORGIA",
+"2013Q2",
+1.37,
+0.14,
+157899495.6 
+],
+[
+ "VTB BANK-GEORGIA",
+"2013Q2",
+4.78,
+3.54,
+612624125.8 
+],
+[
+ "BANK OF GEORGIA",
+"2013Q3",
+34.5,
+32.26,
+5385578769 
+],
+[
+ "THE INTERNATIONAL BANK OF AZERBAIJAN-GEORGIA",
+"2013Q3",
+1.11,
+0.13,
+134652715.2 
+],
+[
+ "PROCREDIT BANK",
+"2013Q3",
+7.34,
+7.36,
+1001665187 
+],
+[
+ "TBC BANK",
+"2013Q3",
+24.33,
+32.86,
+3659793845 
+],
+[
+ "HALYK BANK GEORGIA",
+"2013Q3",
+0.75,
+0.14,
+106712505 
+],
+[
+ "CARTU BANK",
+"2013Q3",
+3.46,
+1.85,
+477530632 
+],
+[
+ "PRIVATBANK",
+"2013Q3",
+2.59,
+3.21,
+486417627.6 
+],
+[
+ "CAUCASUSDEVELOPMENT BANK - GEORGIA",
+"2013Q3",
+0.06,
+0.02,
+17603673 
+],
+[
+ "KOR STANDARD BANK",
+"2013Q3",
+2.67,
+2.84,
+451542623.7 
+],
+[
+ "CAPITAL BANK",
+"2013Q3",
+0.1,
+0.04,
+30787319 
+],
+[
+ "SILK ROAD BANK",
+"2013Q3",
+0.63,
+0.53,
+126832551.8 
+],
+[
+ "VTB BANK-GEORGIA",
+"2013Q3",
+5.08,
+3.67,
+766046906 
+],
+[
+ "BANK CONSTANTA",
+"2013Q3",
+2.81,
+1.1,
+321379019.2 
+],
+[
+ "TURKEY ISBANK A.S BATUMI BRANCH",
+"2013Q3",
+0.14,
+0.01,
+25041756.98 
+],
+[
+ "BANK REPUBLIC",
+"2013Q3",
+6.45,
+4.74,
+890813139.4 
+],
+[
+ "ZIRAAT BANKASI A.S. TBILISI BRANCH",
+"2013Q3",
+0.04,
+0.09,
+43551663 
+],
+[
+ "BASISBANK",
+"2013Q3",
+1.83,
+2.07,
+348138060 
+],
+[
+ "PASHA BANK GEORGIA",
+"2013Q3",
+0.04,
+0,
+35826511.37 
+],
+[
+ "LIBERTY BANK",
+"2013Q3",
+6.08,
+7.09,
+1297933906 
+],
+[
+ "ZIRAAT BANKASI A.S. TBILISI BRANCH",
+"2014Q1",
+0.09,
+0.07,
+40595352 
+],
+[
+ "TBC BANK",
+"2014Q1",
+24.15,
+31.35,
+4073806795 
+],
+[
+ "PROGRESS BANK",
+"2014Q1",
+0.39,
+0.52,
+58581097.53 
+],
+[
+ "VTB BANK-GEORGIA",
+"2014Q1",
+5.18,
+4.32,
+903340910.3 
+],
+[
+ "HALYK BANK GEORGIA",
+"2014Q1",
+0.83,
+0.22,
+133678337.8 
+],
+[
+ "PROCREDIT BANK",
+"2014Q1",
+6.85,
+6.65,
+1010917052 
+],
+[
+ "CAUCASUSDEVELOPMENT BANK - GEORGIA",
+"2014Q1",
+0.07,
+0.09,
+23484290 
+],
+[
+ "BANK REPUBLIC",
+"2014Q1",
+6.49,
+4.6,
+946064926.8 
+],
+[
+ "TURKEY ISBANK A.S BATUMI BRANCH",
+"2014Q1",
+0.32,
+0,
+44404755.4 
+],
+[
+ "PRIVATBANK",
+"2014Q1",
+3.09,
+3.44,
+575819365.5 
+],
+[
+ "KOR STANDARD BANK",
+"2014Q1",
+2.55,
+2.65,
+486967637.2 
+],
+[
+ "CARTU BANK",
+"2014Q1",
+3.75,
+2.27,
+570326460 
+],
+[
+ "CAPITAL BANK",
+"2014Q1",
+0.16,
+0.2,
+43863955 
+],
+[
+ "SILK ROAD BANK",
+"2014Q1",
+0.46,
+0.42,
+121545454.2 
+],
+[
+ "PASHA BANK GEORGIA",
+"2014Q1",
+0.09,
+0,
+120956215.3 
+],
+[
+ "FINCA BANK GEORGIA",
+"2014Q1",
+1.16,
+0.02,
+144266880.8 
+],
+[
+ "BASISBANK",
+"2014Q1",
+1.97,
+1.83,
+401043099.2 
+],
+[
+ "THE INTERNATIONAL BANK OF AZERBAIJAN-GEORGIA",
+"2014Q1",
+0.82,
+0.09,
+116223271.4 
+],
+[
+ "LIBERTY BANK",
+"2014Q1",
+6.78,
+8.04,
+1400407331 
+],
+[
+ "BANK OF GEORGIA",
+"2014Q1",
+31.88,
+32.29,
+5996943222 
+],
+[
+ "BANK CONSTANTA",
+"2014Q1",
+2.94,
+0.95,
+373246288.1 
+],
+[
+ "THE INTERNATIONAL BANK OF AZERBAIJAN-GEORGIA",
+"2014Q2",
+0.8,
+0.08,
+112869364.7 
+],
+[
+ "TBC BANK",
+"2014Q2",
+24.25,
+30.13,
+4377638920 
+],
+[
+ "SILK ROAD BANK",
+"2014Q2",
+0.39,
+0.36,
+121046551.5 
+],
+[
+ "PRIVATBANK",
+"2014Q2",
+2.97,
+3.62,
+592828987.9 
+],
+[
+ "BANK CONSTANTA",
+"2014Q2",
+3.07,
+1.04,
+406651838.4 
+],
+[
+ "CARTU BANK",
+"2014Q2",
+3.88,
+2.76,
+665635562 
+],
+[
+ "LIBERTY BANK",
+"2014Q2",
+6.74,
+8.46,
+1503337054 
+],
+[
+ "CAUCASUSDEVELOPMENT BANK - GEORGIA",
+"2014Q2",
+0.06,
+0.08,
+22745317 
+],
+[
+ "PASHA BANK GEORGIA",
+"2014Q2",
+0.23,
+0,
+127834992.2 
+],
+[
+ "FINCA BANK GEORGIA",
+"2014Q2",
+1.14,
+0.02,
+153670575 
+],
+[
+ "PROCREDIT BANK",
+"2014Q2",
+6.81,
+6.38,
+1016685828 
+],
+[
+ "HALYK BANK GEORGIA",
+"2014Q2",
+0.81,
+0.21,
+135964556.8 
+],
+[
+ "PROGRESS BANK",
+"2014Q2",
+0.41,
+0.6,
+65943774.84 
+],
+[
+ "CAPITAL BANK",
+"2014Q2",
+0.14,
+0.19,
+35874558 
+],
+[
+ "BASISBANK",
+"2014Q2",
+2.04,
+2.49,
+469054268 
+],
+[
+ "TURKEY ISBANK A.S BATUMI BRANCH",
+"2014Q2",
+0.35,
+0.07,
+48423536.26 
+],
+[
+ "ZIRAAT BANKASI A.S. TBILISI BRANCH",
+"2014Q2",
+0.09,
+0.08,
+38467991 
+],
+[
+ "KOR STANDARD BANK",
+"2014Q2",
+2.48,
+3.15,
+512518815.8 
+],
+[
+ "VTB BANK-GEORGIA",
+"2014Q2",
+4.99,
+4.64,
+870129494.1 
+],
+[
+ "BANK OF GEORGIA",
+"2014Q2",
+31.91,
+30.96,
+6017628758 
+],
+[
+ "BANK REPUBLIC",
+"2014Q2",
+6.44,
+4.67,
+1026035051 
+],
+[
+ "SILK ROAD BANK",
+"2014Q3",
+0.32,
+0.36,
+123380427.1 
+],
+[
+ "HALYK BANK GEORGIA",
+"2014Q3",
+0.91,
+0.24,
+151059110.8 
+],
+[
+ "VTB BANK-GEORGIA",
+"2014Q3",
+5.11,
+5,
+945308881.2 
+],
+[
+ "PASHA BANK GEORGIA",
+"2014Q3",
+0.29,
+0.08,
+132040708.4 
+],
+[
+ "CAPITAL BANK",
+"2014Q3",
+0.16,
+0.16,
+47677268 
+],
+[
+ "ZIRAAT BANKASI A.S. TBILISI BRANCH",
+"2014Q3",
+0.09,
+0.19,
+46941437 
+],
+[
+ "CAUCASUSDEVELOPMENT BANK - GEORGIA",
+"2014Q3",
+0.06,
+0.07,
+27372597 
+],
+[
+ "CARTU BANK",
+"2014Q3",
+3.78,
+2.34,
+681969282 
+],
+[
+ "FINCA BANK GEORGIA",
+"2014Q3",
+1.09,
+0.04,
+152008143.4 
+],
+[
+ "THE INTERNATIONAL BANK OF AZERBAIJAN-GEORGIA",
+"2014Q3",
+0.78,
+0.06,
+128150777.6 
+],
+[
+ "BANK CONSTANTA",
+"2014Q3",
+3.06,
+0.98,
+414578577.3 
+],
+[
+ "KOR STANDARD BANK",
+"2014Q3",
+2.48,
+3.56,
+549228868.5 
+],
+[
+ "LIBERTY BANK",
+"2014Q3",
+6.58,
+9.03,
+1571762742 
+],
+[
+ "TBC BANK",
+"2014Q3",
+24.68,
+29.23,
+4611324080 
+],
+[
+ "PROGRESS BANK",
+"2014Q3",
+0.4,
+0.74,
+80424867.49 
+],
+[
+ "BANK OF GEORGIA",
+"2014Q3",
+32.13,
+30.65,
+6049363372 
+],
+[
+ "BASISBANK",
+"2014Q3",
+2.09,
+3.15,
+609696047.6 
+],
+[
+ "PROCREDIT BANK",
+"2014Q3",
+6.57,
+6.29,
+1051627329 
+],
+[
+ "PRIVATBANK",
+"2014Q3",
+2.7,
+3.35,
+605653333.4 
+],
+[
+ "BANK REPUBLIC",
+"2014Q3",
+6.37,
+4.4,
+1081494153 
+],
+[
+ "TURKEY ISBANK A.S BATUMI BRANCH",
+"2014Q3",
+0.36,
+0.05,
+54454945.3 
+],
+[
+ "SILK ROAD BANK",
+"2015Q1",
+0.14,
+0.21,
+89367092.6 
+],
+[
+ "PASHA BANK GEORGIA",
+"2015Q1",
+0.5,
+0.04,
+202757693.2 
+],
+[
+ "CARTU BANK",
+"2015Q1",
+4.67,
+3.28,
+920472119 
+],
+[
+ "PROCREDIT BANK",
+"2015Q1",
+5.79,
+5.54,
+1134418880 
+],
+[
+ "CAUCASUSDEVELOPMENT BANK - GEORGIA",
+"2015Q1",
+0.08,
+0.07,
+31386048 
+],
+[
+ "PROGRESS BANK",
+"2015Q1",
+0.43,
+0.78,
+120803101.8 
+],
+[
+ "BASISBANK",
+"2015Q1",
+2.5,
+3.6,
+679655222.3 
+],
+[
+ "TBC BANK",
+"2015Q1",
+28.01,
+30.29,
+5783517977 
+],
+[
+ "TURKEY ISBANK A.S BATUMI BRANCH",
+"2015Q1",
+0.72,
+0.34,
+124451318.1 
+],
+[
+ "PRIVATBANK",
+"2015Q1",
+2.02,
+3.12,
+583407756 
+],
+[
+ "KOR STANDARD BANK",
+"2015Q1",
+2.66,
+3,
+641474814 
+],
+[
+ "VTB BANK-GEORGIA",
+"2015Q1",
+4.93,
+4.46,
+1124698847 
+],
+[
+ "LIBERTY BANK",
+"2015Q1",
+5.11,
+8.32,
+1530465442 
+],
+[
+ "ZIRAAT BANKASI A.S. TBILISI BRANCH",
+"2015Q1",
+0.09,
+0.25,
+74404809 
+],
+[
+ "THE INTERNATIONAL BANK OF AZERBAIJAN-GEORGIA",
+"2015Q1",
+0.63,
+0.01,
+162729112.9 
+],
+[
+ "FINCA BANK GEORGIA",
+"2015Q1",
+1.04,
+0.06,
+188714520.6 
+],
+[
+ "BANK OF GEORGIA",
+"2015Q1",
+32.73,
+31.51,
+7786028049 
+],
+[
+ "HALYK BANK GEORGIA",
+"2015Q1",
+0.92,
+0.2,
+181620932.1 
+],
+[
+ "BANK REPUBLIC",
+"2015Q1",
+6.87,
+4.73,
+1297864490 
+],
+[
+ "CAPITAL BANK",
+"2015Q1",
+0.14,
+0.18,
+45196923 
+] 
+];
+data.addColumn('string','Bank');
+data.addColumn('string','Quarter');
+data.addColumn('number','LoanMarketShare');
+data.addColumn('number','DepositMarketShare');
+data.addColumn('number','TotalAssets');
+data.addRows(datajson);
+return(data);
+}
+ 
+// jsDrawChart
+function drawChartMotionChartID27f8285017b0() {
+var data = gvisDataMotionChartID27f8285017b0();
+var options = {};
+options["width"] =    700;
+options["height"] =    400;
+options["state"] = "{\"colorOption\":\"_UNIQUE_COLOR\"};";
+
+    var chart = new google.visualization.MotionChart(
+    document.getElementById('MotionChartID27f8285017b0')
+    );
+    chart.draw(data,options);
+    
+
+}
+  
+ 
+// jsDisplayChart
+(function() {
+var pkgs = window.__gvisPackages = window.__gvisPackages || [];
+var callbacks = window.__gvisCallbacks = window.__gvisCallbacks || [];
+var chartid = "motionchart";
+  
+// Manually see if chartid is in pkgs (not all browsers support Array.indexOf)
+var i, newPackage = true;
+for (i = 0; newPackage && i < pkgs.length; i++) {
+if (pkgs[i] === chartid)
+newPackage = false;
+}
+if (newPackage)
+  pkgs.push(chartid);
+  
+// Add the drawChart function to the global list of callbacks
+callbacks.push(drawChartMotionChartID27f8285017b0);
+})();
+function displayChartMotionChartID27f8285017b0() {
+  var pkgs = window.__gvisPackages = window.__gvisPackages || [];
+  var callbacks = window.__gvisCallbacks = window.__gvisCallbacks || [];
+  window.clearTimeout(window.__gvisLoad);
+  // The timeout is set to 100 because otherwise the container div we are
+  // targeting might not be part of the document yet
+  window.__gvisLoad = setTimeout(function() {
+  var pkgCount = pkgs.length;
+  google.load("visualization", "1", { packages:pkgs, callback: function() {
+  if (pkgCount != pkgs.length) {
+  // Race condition where another setTimeout call snuck in after us; if
+  // that call added a package, we must not shift its callback
+  return;
+}
+while (callbacks.length > 0)
+callbacks.shift()();
+} });
+}, 100);
+}
+ 
+// jsFooter
+</script>
+ 
+
+<!-- jsChart -->  
+
+<script type="text/javascript" src="https://www.google.com/jsapi?callback=displayChartMotionChartID27f8285017b0"></script>
+ 
+
+<!-- divChart -->
+
+<div id="MotionChartID27f8285017b0" 
+  style="width: 700; height: 400;">
+</div>
+
+<h2>4. Intermediary Steps</h2>
+
+<h3>Step 1: Downloading Banks&#39; Quarterly Reports</h3>
+
+<p><strong>Input</strong>: Webpage &ldquo;Financial Indices of Commercial Banks&rdquo; of the National Bank. (see link above)  </p>
+
+<p><strong>Sub-steps:</strong><br/>
+1. Extracting the list of Georgian Banks&#39;s names (to use as referential for further steps).<br/>
+2. Extracting all the URLs of the quarterly reports<br/>
+3. Downloading all the quarterly reports  </p>
+
+<p><strong>Outputs:</strong></p>
+
+<ul>
+<li>CSV file with list of banks</li>
+<li>All downloaded Banks&#39; quaterly reports (Excel files)</li>
+</ul>
+
+<p>See source code: <a href="https://github.com/geojsg/geobanks/blob/master/01-harvestGeoBanks.R">01-harvestGeoBanks.R</a></p>
+
+<h3>Step 2: Transforming raw data into structured data</h3>
+
+<p><strong>Input:</strong> </p>
+
+<ul>
+<li>CSV file with list of banks (generated from step1)</li>
+<li>All Banks&#39; quaterly reports (Excel files) (generated from step1)</li>
+</ul>
+
+<p><strong>Sub-steps:</strong><br/>
+For each reports, extract following fields :<br/>
+1. Bank name (handling exceptions of renamed banks and using a fuzzy matching as names are sometimes partial or with typos)<br/>
+2. Report Date (using parsing as not all the time in same format and managing exceptions of wrong dates)<br/>
+3. NetIncome and Personnel expenses from P&amp;L<br/>
+4. TotalAssets, Net Loans, Time Deposit and Demand Deposit from balance sheet  </p>
+
+<p>On consolidated data:<br/>
+5. Calculate the total market of loans and deposits per quarter to calculate the market share for each bank per quarter  </p>
+
+<p><strong>Outputs:</strong></p>
+
+<ul>
+<li>CSV file including selected features (e.g. Total Assets, &hellip;) per bank and per quarter.</li>
+</ul>
+
+<p>See source code: <a href="https://github.com/geojsg/geobanks/blob/master/02-transformGeoBanks.R">02-transformGeoBanks.R</a></p>
+
+<h3>Step 3: Generating the charts embedded in a HTML file</h3>
+
+<p><strong>Input:</strong></p>
+
+<ul>
+<li>CSV file including selected features (e.g. Total Assets, &hellip;) per bank and per quarter. (generated from step2)</li>
+</ul>
+
+<p><strong>Sub-steps:</strong><br/>
+1. Creating report (this HTML page) in Rmarkdown<br/>
+2. For chart 1, filtering only Q3 banks&#39; figures<br/>
+3. Selecting, ordering, formating features for each chart<br/>
+3. Building the charts with Google Chart (googleVis)<br/>
+4. Displaying the charts embedded in the page.  </p>
+
+<p><strong>Output:</strong></p>
+
+<ul>
+<li>HTML file (this page) with embedded motion charts.</li>
+</ul>
+
+<p>See source code: <a href="https://github.com/geojsg/geobanks/blob/master/03-GeoBanks.Rmd">03-GeoBanks.Rmd</a></p>
+
+<h2>5. Lessons Learned</h2>
+
+<ul>
+<li>Unfortunately, bank&#39;s financial data of quarter IV (most important) of each year is not available as data are uploaded in pdf. It would be nice if the National Bank could provide Q4 data in Excel format as well.<br/></li>
+<li>Google Motion Chart seems to have some bugs: when bubbles&#39; color is set to &ldquo;_UNIQUE&rdquo;, the the feature for te size of bubbles is no more considered. Besides, it is still quite limited as colors cannot be set for each Bank.<br/></li>
+<li>Reports in Excel could mean data are semi-structured as formated by a template to follow strictly. However, data quality was not so good (see below main issues) which required to add more codes to handle exceptions or make fuzzy matching and parsing.</li>
+</ul>
+
+<h3>Main Data Quality issues</h3>
+
+<ul>
+<li>2013-Q3 report of Progress Bank not available (URL pointing to a page not found)<br/></li>
+<li>2007-Q2 report of Liberty Bank (People&#39;s Bank) not available as, instead of it, was uploaded report of Bank Republic<br/></li>
+<li>Reports from 2009 till 2012-Q2 of Liberty Bank are not uploaded<br/></li>
+<li>2011-Q1 &amp; Q2 reports of Basis Bank are not retrievable as uploaded in PDF<br/></li>
+<li>In 2014-Q3 report of Pasha Bank, report date written is the one of the previous year (2013-Q3)<br/></li>
+<li>In 2014-Q1 report of Progress Bank, report date written is the one of the previous year (2043-Q1)<br/></li>
+<li>In 2009-Q2 report of International Bank of Azerbaijan, report date written is the one of the previous year (2008-Q2)<br/></li>
+<li>In 2009-Q2 report of PRIVAT Bank, report date written is the one of the previous quarter (2009-Q1)<br/></li>
+<li>In 2009-Q1 report of KOR Standard Bank, report date written is the one of the previous year (2008-Q1) </li>
+<li>Report Date and Bank name are not all the time written on each sheet.</li>
+<li>Dates are not in same date format (Excel date format) in several reports.<br/></li>
+<li>Names of the Excel sheets are not exactly the same for some reports. For example, there can be found, sheets named &ldquo;RC &rdquo; instead of &ldquo;RC&rdquo;.<br/></li>
+</ul>
+
+</body>
+
+</html>
